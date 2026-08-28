@@ -1,4 +1,6 @@
-# app.py
+"""Простой веб-сервер на стандартной библиотеке http.server:
+GET-запросы отдают HTML-страницы, POST-запросы логируются в консоль."""
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs
 
@@ -7,7 +9,12 @@ PORT = 8000
 
 
 class ContactsHandler(BaseHTTPRequestHandler):
+    """Обработчик HTTP-запросов: отдаёт HTML-страницы на GET,
+        печатает тело запроса в консоль на POST."""
+
     def do_GET(self):
+        """Обрабатывает любой GET-запрос — возвращает contacts.html."""
+
         with open('templates/contacts.html', 'r', encoding='utf-8') as f:
             content = f.read()
 
@@ -17,6 +24,8 @@ class ContactsHandler(BaseHTTPRequestHandler):
         self.wfile.write(content.encode('utf-8'))
 
     def do_POST(self):
+        """Обрабатывает любой POST-запрос — читает тело запроса
+               и печатает его (включая разобранные form-данные) в консоль."""
         content_length = int(self.headers.get('Content-Length', 0))
         raw_body = self.rfile.read(content_length)
         body_str = raw_body.decode('utf-8')
@@ -37,6 +46,7 @@ class ContactsHandler(BaseHTTPRequestHandler):
 
 
 def run(server_class=HTTPServer, handler_class=ContactsHandler):
+    """Запускает HTTP-сервер на HOST:PORT и держит его активным."""
     server_address = (HOST, PORT)
     httpd = server_class(server_address, handler_class)
     print(f'Serving on http://{HOST}:{PORT}')
