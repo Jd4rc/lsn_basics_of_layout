@@ -1,0 +1,221 @@
+:root {
+    --pink: #f6c6ce;
+    --pink-deep: #e79aa7;
+    --ink: #221d1c;
+    --cream: #f3efe7;
+}
+
+body {
+    background-color: var(--pink);
+    color: var(--ink);
+    font-family: 'Oswald', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: .02em;
+}
+
+/* зерно поверх страницы */
+.grain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: .16;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+h1, h2, h3, .display-serif {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -.01em;
+    line-height: .95;
+}
+
+h1 {
+    font-size: clamp(3rem, 11vw, 8rem);
+    text-transform: capitalize;
+}
+
+/* навигация */
+.site-nav {
+    border-bottom: 2px solid var(--ink);
+    padding-block: 1rem;
+}
+
+.site-nav .navbar-brand {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.6rem;
+    color: var(--ink);
+}
+
+.site-nav .nav-link {
+    color: var(--ink);
+    text-transform: uppercase;
+    font-size: .82rem;
+    letter-spacing: .12em;
+    padding-inline: .9rem;
+}
+
+.site-nav .nav-link:hover {
+    color: var(--cream);
+}
+
+/* блок «титров» в подвале */
+.site-footer {
+    border-top: 2px solid var(--ink);
+    padding-block: 2.5rem;
+    text-align: center;
+}
+
+.credits {
+    text-transform: uppercase;
+    font-size: .8rem;
+    letter-spacing: .1em;
+    margin-bottom: .4rem;
+}
+
+.credits__label {
+    font-size: .62rem;
+    opacity: .6;
+    margin-inline: .6rem .25rem;
+}
+
+/* кнопки в духе постера */
+.btn-ink {
+    background-color: var(--ink);
+    color: var(--pink);
+    border-radius: 0;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-size: .8rem;
+    padding: .7rem 1.6rem;
+}
+
+.btn-ink:hover {
+    background-color: var(--cream);
+    color: var(--ink);
+}
+
+.credits--fine {
+    font-size: .62rem;
+    opacity: .55;
+    margin-top: 1.2rem;
+}
+
+.credits a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+}
+
+
+/* постерный блок */
+.poster {
+    border: 2px solid var(--ink);
+}
+
+.poster__photo {
+    position: relative;
+    overflow: hidden;
+}
+
+.poster__img {
+    display: block;
+    width: 100%;
+    height: clamp(260px, 46vh, 520px);
+    object-fit: cover;
+    filter: saturate(.85) contrast(1.05);
+}
+
+.poster__title {
+    position: absolute;
+    left: 50%;
+    bottom: -.08em;
+    transform: translateX(-50%);
+    margin: 0;
+    color: var(--pink);
+    white-space: nowrap;
+    text-shadow: 0 0 24px rgba(0, 0, 0, .25);
+}
+
+.poster__strip {
+    background-color: var(--pink);
+    border-top: 2px solid var(--ink);
+    padding: 2.5rem 1rem;
+    text-align: center;
+}
+
+.lead-serif {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: clamp(1.3rem, 2.6vw, 2rem);
+    line-height: 1.25;
+    margin-bottom: 1.6rem;
+}
+
+.section-title {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: .4rem;
+    margin-bottom: 1.6rem;
+}
+
+/* плитки категорий */
+.tile {
+    border: 2px solid var(--ink);
+    padding: 1.4rem;
+    transition: background-color .2s, color .2s;
+}
+
+.tile:hover {
+    background-color: var(--ink);
+    color: var(--pink);
+}
+
+.tile__num {
+    font-size: .7rem;
+    letter-spacing: .18em;
+    opacity: .6;
+}
+
+.tile__title {
+    font-size: 1.8rem;
+    margin: .3rem 0 .6rem;
+}
+
+.tile__text {
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* карточки товаров */
+.card-ink {
+    background-color: var(--cream);
+    border: 2px solid var(--ink);
+}
+
+.card-ink__body {
+    padding: 1.4rem;
+}
+
+.card-ink__title {
+    font-size: 1.7rem;
+    margin-bottom: .4rem;
+}
+
+.card-ink__meta {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    opacity: .65;
+    margin-bottom: .8rem;
+}
+
+.card-ink__price {
+    font-size: .9rem;
+    letter-spacing: .08em;
+    margin: 0;
+}

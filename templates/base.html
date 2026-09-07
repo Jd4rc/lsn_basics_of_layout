@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Аквариумы и рыбки{% endblock %}</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/fish.svg' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/fish-180.png' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Oswald:wght@500;600&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<svg class="grain" aria-hidden="true">
+    <filter id="noise">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3"/>
+    </filter>
+    <rect width="100%" height="100%" filter="url(#noise)"/>
+</svg>
+
+<nav class="navbar navbar-expand-lg site-nav">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'catalog:home' %}">Lunch&nbsp;Time Aquatics</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#mainNav" aria-controls="mainNav"
+                aria-expanded="false" aria-label="Меню">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="#">Аквариумы</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Рыбки</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Растения</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Оборудование</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'catalog:contacts' %}">Контакты</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container py-5">
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p class="credits">
+            <span class="credits__label">поставки</span> ЖИВЫЕ КОРМА И МАЛЬКИ
+            <span class="credits__label">консультации</span> АКВАРИУМИСТЫ С 2014 ГОДА
+        </p>
+        <p class="credits">
+            <span class="credits__label">доставка</span> ПО ВСЕЙ СТРАНЕ
+            <span class="credits__label">телефон</span> +375 (00) 000-00-00
+        </p>
+        <p class="credits credits--fine">
+            <span class="credits__label">icon</span>
+            <a href="https://iconscout.com/icons/fish" target="_blank" rel="noopener">Fish</a>
+            by
+            <a href="https://iconscout.com/contributors/lastspark" target="_blank" rel="noopener">Nikita Golubev</a>
+        </p>
+    </div>
+</footer>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
