@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Каталог{% endblock %}
+
+{% block content %}
+<h1>Lunch Time</h1>
+<p class="credits"><span class="credits__label">a shop by</span> АКВАРИУМИСТЫ</p>
+
+{% if sent %}
+<div class="notice mb-4">Спасибо! Мы свяжемся с тобой в ближайшее время.</div>
+{% endif %}
+
+<form method="post" class="feedback">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label for="name" class="form-label-ink">Имя</label>
+        <input type="text" class="form-control input-ink" id="name" name="name" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="phone" class="form-label-ink">Телефон</label>
+        <input type="tel" class="form-control input-ink" id="phone" name="phone" required>
+    </div>
+
+    <div class="mb-3">
+        <label for="message" class="form-label-ink">Сообщение</label>
+        <textarea class="form-control input-ink" id="message" name="message" rows="4" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-ink">Отправить</button>
+</form>
+{% endblock %}

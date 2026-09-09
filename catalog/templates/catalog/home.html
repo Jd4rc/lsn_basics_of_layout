@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lunch Time Aquatics — аквариумы и рыбки{% endblock %}
+
+{% block content %}
+
+    <section class="poster mb-5">
+        <div class="poster__photo">
+            <img src="{% static 'images/ferb.jpg' %}" alt="Аквариум с растениями" class="poster__img">
+            <h1 class="poster__title">Lunch Time</h1>
+        </div>
+        <div class="poster__strip">
+            <p class="credits mb-0">
+                <span class="credits__label">a shop by</span> АКВАРИУМИСТЫ
+            </p>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <p class="lead-serif">
+            Аквариумы, рыбки, растения и всё, что превращает<br>
+            стеклянный ящик в маленький живой водоём.
+        </p>
+        <a href="{% url 'catalog:contacts' %}" class="btn btn-ink">Написать нам</a>
+    </section>
+
+    <section class="mb-5">
+        <h2 class="section-title">Категории</h2>
+        <div class="row g-4">
+            <div class="col-12 col-md-6 col-lg-3">
+                <article class="tile h-100">
+                    <span class="tile__num">01</span>
+                    <h3 class="tile__title">Аквариумы</h3>
+                    <p class="tile__text">От нано-кубов на 10 литров до травников на две сотни.</p>
+                </article>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <article class="tile h-100">
+                    <span class="tile__num">02</span>
+                    <h3 class="tile__title">Рыбки</h3>
+                    <p class="tile__text">Неоны, гуппи, скалярии, сомики и капризные дискусы.</p>
+                </article>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <article class="tile h-100">
+                    <span class="tile__num">03</span>
+                    <h3 class="tile__title">Растения</h3>
+                    <p class="tile__text">Анубиасы, криптокорины, мхи и почвопокровка для ковра.</p>
+                </article>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <article class="tile h-100">
+                    <span class="tile__num">04</span>
+                    <h3 class="tile__title">Оборудование</h3>
+                    <p class="tile__text">Фильтры, свет, CO₂, нагреватели и тесты воды.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-5">
+        <h2 class="section-title">Сейчас в наличии</h2>
+        <div class="row g-4">
+            <div class="col-12 col-md-4">
+                <article class="card-ink h-100">
+                    <div class="card-ink__body">
+                        <h3 class="card-ink__title">Неон голубой</h3>
+                        <p class="card-ink__meta">Paracheirodon innesi · стайная · 3 см</p>
+                        <p class="card-ink__price">4 руб. / шт.</p>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-md-4">
+                <article class="card-ink h-100">
+                    <div class="card-ink__body">
+                        <h3 class="card-ink__title">Скалярия</h3>
+                        <p class="card-ink__meta">Pterophyllum scalare · парная · 15 см</p>
+                        <p class="card-ink__price">18 руб. / шт.</p>
+                    </div>
+                </article>
+            </div>
+            <div class="col-12 col-md-4">
+                <article class="card-ink h-100">
+                    <div class="card-ink__body">
+                        <h3 class="card-ink__title">Сомик коридорас</h3>
+                        <p class="card-ink__meta">Corydoras paleatus · донная · 6 см</p>
+                        <p class="card-ink__price">9 руб. / шт.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
