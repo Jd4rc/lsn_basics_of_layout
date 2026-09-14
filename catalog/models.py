@@ -33,6 +33,20 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Добавлен')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлён')
 
+    NEW = 'new'
+    USED = 'used'
+    CONDITION_CHOICES = [
+        (NEW, 'Новый'),
+        (USED, 'Б/у'),
+    ]
+
+    condition = models.CharField(
+        max_length=10,
+        choices=CONDITION_CHOICES,
+        default=NEW,
+        verbose_name='Состояние',
+    )
+
     def __str__(self):
         return f'{self.name} ({self.category})'
 
