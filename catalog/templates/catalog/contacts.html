@@ -10,6 +10,17 @@
 <div class="notice mb-4">Спасибо! Мы свяжемся с тобой в ближайшее время.</div>
 {% endif %}
 
+{% if contact_info %}
+<div class="contact-info mb-4">
+    <p>Телефон: {{ contact_info.phone }}</p>
+    <p>Email: {{ contact_info.email }}</p>
+    <p>Адрес: {{ contact_info.address }}</p>
+    {% if contact_info.work_hours %}
+    <p>Часы работы: {{ contact_info.work_hours }}</p>
+    {% endif %}
+</div>
+{% endif %}
+
 <form method="post" class="feedback">
     {% csrf_token %}
 

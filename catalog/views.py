@@ -2,18 +2,20 @@
 
 from django.shortcuts import render, get_object_or_404
 
-from catalog.models import Category, Product
+from catalog.models import Category, Product, ContactInfo
 
 
 def contacts(request):
+    contact_info = ContactInfo.objects.first()
+
     if request.method == 'POST':
         name = request.POST.get('name')
         phone = request.POST.get('phone')
         message = request.POST.get('message')
         print(f'Сообщение от {name} ({phone}): {message}')
-        return render(request, 'catalog/contacts.html', {'sent': True})
+        return render(request, 'catalog/contacts.html', {'sent': True, 'contact_info': contact_info})
 
-    return render(request, 'catalog/contacts.html')
+    return render(request, 'catalog/contacts.html', {'contact_info': contact_info})
 
 def home(request):
     latest_products = Product.objects.order_by('-created_at')[:5]
