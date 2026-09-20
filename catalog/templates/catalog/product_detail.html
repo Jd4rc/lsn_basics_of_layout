@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+
+<h1>{{ product.name }}</h1>
+
+{% if product.image %}
+<img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid mb-4">
+{% endif %}
+
+<p class="card-ink__price">{{ product.price }} ₽</p>
+
+{% if product.description %}
+<p>{{ product.description }}</p>
+{% else %}
+<p>Описание пока не добавлено.</p>
+{% endif %}
+
+<ul>
+    <li>Категория:
+        <a href="{% url 'catalog:category_detail' product.category.slug %}">{{ product.category }}</a>
+    </li>
+    <li>Состояние: {{ product.get_condition_display }}</li>
+    <li>Остаток на складе: {{ product.stock }}</li>
+    <li>В продаже: {{ product.is_active|yesno:"да,нет" }}</li>
+    <li>Добавлен: {{ product.created_at|date:"d.m.Y H:i" }}</li>
+    <li>Обновлён: {{ product.updated_at|date:"d.m.Y H:i" }}</li>
+</ul>
+
+<a href="{% url 'catalog:home' %}" class="btn btn-ink">На главную</a>
+
+{% endblock %}
