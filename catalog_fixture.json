@@ -3,39 +3,115 @@
     "model": "catalog.category",
     "pk": 1,
     "fields": {
+      "name": "Аквариумы",
+      "description": "Стеклянные и акриловые аквариумы от нано-кубов до травников на две сотни литров.",
+      "slug": "akvariumy"
+    }
+  },
+  {
+    "model": "catalog.category",
+    "pk": 2,
+    "fields": {
       "name": "Рыбки",
+      "description": "Живая рыба для пресноводного аквариума: стайные, донные и territorial-виды.",
       "slug": "rybki"
     }
   },
   {
     "model": "catalog.category",
-    "pk": 6,
+    "pk": 3,
     "fields": {
-      "name": "Рептилии",
-      "slug": "reptiles"
+      "name": "Растения",
+      "description": "Аквариумные растения: от неприхотливых анубиасов до требовательной почвопокровки.",
+      "slug": "rasteniya"
     }
   },
   {
     "model": "catalog.category",
-    "pk": 7,
+    "pk": 4,
     "fields": {
-      "name": "Птицы",
-      "slug": "birds"
+      "name": "Оборудование",
+      "description": "Фильтры, освещение, нагреватели, системы CO2 и тесты воды.",
+      "slug": "oborudovanie"
     }
   },
   {
     "model": "catalog.product",
     "pk": 1,
     "fields": {
-      "category": 1,
+      "category": 2,
+      "name": "Гуппи",
+      "description": "Гуппи (Poecilia reticulata) — самая известная аквариумная рыбка и лучший выбор для первого аквариума. Неприхотлива, живородяща, самцы отличаются яркими вуалевыми хвостами. Держать стайкой от шести особей.",
+      "price": "200.00",
+      "stock": 40,
+      "is_active": true,
+      "image": "products/Гуппи.jpg",
+      "created_at": "2026-09-18T10:00:00Z",
+      "updated_at": "2026-09-18T10:00:00Z",
+      "condition": "new"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 2,
+    "fields": {
+      "category": 2,
       "name": "Скалярия",
-      "description": "123_test",
-      "price": "90.08",
+      "description": "Скалярия (Pterophyllum scalare) — высокая парная цихлида с характерным треугольным силуэтом. Требует аквариума от ста литров и высоты не менее сорока сантиметров, мирно уживается с соразмерными соседями.",
+      "price": "900.00",
+      "stock": 12,
+      "is_active": true,
+      "image": "products/Скалярия.jpg",
+      "created_at": "2026-09-17T10:00:00Z",
+      "updated_at": "2026-09-17T10:00:00Z",
+      "condition": "new"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 3,
+    "fields": {
+      "category": 2,
+      "name": "Неон голубой",
+      "description": "Неон голубой (Paracheirodon innesi) — мелкая стайная рыбка длиной до трёх сантиметров со светящейся голубой полосой вдоль тела. Смотрится эффектно только стаей от пятнадцати особей на тёмном грунте.",
+      "price": "150.00",
+      "stock": 60,
+      "is_active": true,
+      "image": "products/Неон_голубой.jpg",
+      "created_at": "2026-09-16T10:00:00Z",
+      "updated_at": "2026-09-20T10:25:14.586Z",
+      "condition": "used"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 4,
+    "fields": {
+      "category": 1,
+      "name": "Аквариум нано-куб 30 л",
+      "description": "Нано-куб на тридцать литров из осветлённого стекла толщиной шесть миллиметров с бесшовной склейкой. Подходит для креветочника или небольшого травника, помещается на рабочий стол и не требует тумбы.",
+      "price": "4500.00",
+      "stock": 7,
+      "is_active": true,
+      "image": "products/Аквариум_нано-куб_30_л.jpg",
+      "created_at": "2026-09-15T10:00:00Z",
+      "updated_at": "2026-09-20T10:27:02.754Z",
+      "condition": "new"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 5,
+    "fields": {
+      "category": 1,
+      "name": "Аквариум травник 120 л",
+      "description": "Прямоугольный аквариум на сто двадцать литров с оптическим стеклом и чёрной подложкой. Габариты подобраны под стандартные светильники, высота сорок пять сантиметров удобна для посадки длинностебельки.",
+      "price": "16000.00",
       "stock": 3,
       "is_active": true,
-      "image": "products/Fish-SkalMramor_0.png",
-      "created_at": "2026-09-10T10:36:48.690Z",
-      "updated_at": "2026-09-10T10:37:03.252Z",
+      "image": "products/Аквариум_травник_120_л.jpg",
+      "created_at": "2026-09-14T10:00:00Z",
+      "updated_at": "2026-09-20T10:27:38.129Z",
       "condition": "new"
     }
   },
@@ -43,15 +119,15 @@
     "model": "catalog.product",
     "pk": 6,
     "fields": {
-      "category": 6,
-      "name": "Игуана",
-      "description": "",
-      "price": "5000.00",
-      "stock": 0,
+      "category": 3,
+      "name": "Анубиас нана",
+      "description": "Анубиас нана (Anubias barteri var. nana) — медленнорастущее растение с плотными тёмными листьями. Не сажается в грунт, крепится к камню или коряге, выдерживает слабый свет и не требует подачи углекислого газа.",
+      "price": "350.00",
+      "stock": 25,
       "is_active": true,
       "image": "",
-      "created_at": "2026-09-13T09:59:17.515Z",
-      "updated_at": "2026-09-13T09:59:17.515Z",
+      "created_at": "2026-09-13T10:00:00Z",
+      "updated_at": "2026-09-13T10:00:00Z",
       "condition": "new"
     }
   },
@@ -59,15 +135,15 @@
     "model": "catalog.product",
     "pk": 7,
     "fields": {
-      "category": 6,
-      "name": "Игуана",
-      "description": "",
-      "price": "5000.00",
-      "stock": 0,
+      "category": 3,
+      "name": "Криптокорина вендта",
+      "description": "Криптокорина вендта (Cryptocoryne wendtii) — розеточное растение высотой до двадцати сантиметров, образующее плотные заросли на среднем плане. После пересадки может сбросить листья, но быстро восстанавливается.",
+      "price": "280.00",
+      "stock": 18,
       "is_active": true,
       "image": "",
-      "created_at": "2026-09-13T10:54:08.278Z",
-      "updated_at": "2026-09-13T10:54:08.278Z",
+      "created_at": "2026-09-12T10:00:00Z",
+      "updated_at": "2026-09-12T10:00:00Z",
       "condition": "new"
     }
   },
@@ -75,128 +151,42 @@
     "model": "catalog.product",
     "pk": 8,
     "fields": {
-      "category": 6,
-      "name": "Хамелеон",
-      "description": "",
-      "price": "7000.00",
-      "stock": 0,
-      "is_active": false,
+      "category": 4,
+      "name": "Внешний фильтр 700 л/ч",
+      "description": "Внешний канистровый фильтр производительностью семьсот литров в час для аквариумов до полутора сотен литров. Четыре корзины под наполнители, керамический вал ротора и краны для отключения шлангов.",
+      "price": "7200.00",
+      "stock": 9,
+      "is_active": true,
       "image": "",
-      "created_at": "2026-09-13T10:54:08.282Z",
-      "updated_at": "2026-09-13T10:54:08.282Z",
-      "condition": "used"
+      "created_at": "2026-09-11T10:00:00Z",
+      "updated_at": "2026-09-11T10:00:00Z",
+      "condition": "new"
     }
   },
   {
     "model": "catalog.product",
     "pk": 9,
     "fields": {
-      "category": 7,
-      "name": "Попугай ара",
-      "description": "",
-      "price": "15000.00",
-      "stock": 0,
+      "category": 4,
+      "name": "Нагреватель 100 Вт",
+      "description": "Погружной нагреватель мощностью сто ватт с электронным терморегулятором и защитой от работы без воды. Держит температуру с точностью до половины градуса, рассчитан на аквариумы объёмом до ста литров.",
+      "price": "1900.00",
+      "stock": 15,
       "is_active": true,
       "image": "",
-      "created_at": "2026-09-13T10:54:08.284Z",
-      "updated_at": "2026-09-13T10:54:08.284Z",
-      "condition": "new"
-    }
-  },
-  {
-    "model": "catalog.product",
-    "pk": 10,
-    "fields": {
-      "category": 7,
-      "name": "Волнистый попугай",
-      "description": "",
-      "price": "1500.00",
-      "stock": 0,
-      "is_active": true,
-      "image": "",
-      "created_at": "2026-09-13T10:54:08.286Z",
-      "updated_at": "2026-09-13T10:54:08.286Z",
+      "created_at": "2026-09-10T10:00:00Z",
+      "updated_at": "2026-09-10T10:00:00Z",
       "condition": "used"
     }
   },
   {
-    "model": "catalog.product",
-    "pk": 11,
+    "model": "catalog.contactinfo",
+    "pk": 1,
     "fields": {
-      "category": 6,
-      "name": "Игуана",
-      "description": "",
-      "price": "5000.00",
-      "stock": 0,
-      "is_active": true,
-      "image": "",
-      "created_at": "2026-09-13T10:55:17.398Z",
-      "updated_at": "2026-09-13T10:55:17.398Z",
-      "condition": "new"
-    }
-  },
-  {
-    "model": "catalog.product",
-    "pk": 12,
-    "fields": {
-      "category": 6,
-      "name": "Хамелеон",
-      "description": "",
-      "price": "7000.00",
-      "stock": 0,
-      "is_active": false,
-      "image": "",
-      "created_at": "2026-09-13T10:55:17.401Z",
-      "updated_at": "2026-09-13T10:55:17.401Z",
-      "condition": "used"
-    }
-  },
-  {
-    "model": "catalog.product",
-    "pk": 13,
-    "fields": {
-      "category": 7,
-      "name": "Попугай ара",
-      "description": "",
-      "price": "15000.00",
-      "stock": 0,
-      "is_active": true,
-      "image": "",
-      "created_at": "2026-09-13T10:55:17.403Z",
-      "updated_at": "2026-09-13T10:55:17.403Z",
-      "condition": "new"
-    }
-  },
-  {
-    "model": "catalog.product",
-    "pk": 14,
-    "fields": {
-      "category": 7,
-      "name": "Волнистый попугай",
-      "description": "",
-      "price": "1500.00",
-      "stock": 0,
-      "is_active": true,
-      "image": "",
-      "created_at": "2026-09-13T10:55:17.405Z",
-      "updated_at": "2026-09-13T10:55:17.405Z",
-      "condition": "used"
-    }
-  },
-  {
-    "model": "catalog.product",
-    "pk": 15,
-    "fields": {
-      "category": 1,
-      "name": "Гуппи",
-      "description": "",
-      "price": "200.00",
-      "stock": 0,
-      "is_active": false,
-      "image": "",
-      "created_at": "2026-09-13T11:15:33.442Z",
-      "updated_at": "2026-09-13T11:15:33.442Z",
-      "condition": "new"
+      "phone": "123",
+      "email": "e.nmitenin@gmail.com",
+      "address": "123",
+      "work_hours": "123"
     }
   }
 ]
