@@ -21,7 +21,7 @@ def contacts(request):
 
 
 def home(request):
-    products = Product.objects.all()
+    products = Product.objects.filter(is_active=True)
 
     paginator = Paginator(products, PRODUCTS_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get('page'))
