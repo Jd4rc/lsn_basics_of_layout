@@ -1,8 +1,10 @@
-# Create your views here.
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect, render
 
-from django.shortcuts import render, get_object_or_404
+from catalog.forms import ProductForm
+from catalog.models import Category, ContactInfo, Product
 
-from catalog.models import Category, Product, ContactInfo
+PRODUCTS_PER_PAGE = 6
 
 
 def contacts(request):
@@ -17,16 +19,42 @@ def contacts(request):
 
     return render(request, 'catalog/contacts.html', {'contact_info': contact_info})
 
-def home(request):
-    latest_products = Product.objects.order_by('-created_at')[:5]
-    for product in latest_products:
-        print(product)
 
-    return render(request, 'catalog/home.html')
+def home(request):
+    products = Product.objects.filter(is_active=True)
+
+    paginator = Paginator(products, PRODUCTS_PER_PAGE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'catalog/home.html', {
+        'products': page_obj,
+        'page_obj': page_obj,
+    })
+
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    return render(request, 'catalog/product_detail.html', {'product': product})
+
+
+def product_create(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            product = form.save()
+            return redirect('catalog:product_detail', pk=product.pk)
+    else:
+        form = ProductForm()
+
+    return render(request, 'catalog/product_form.html', {'form': form})
+
 
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
     products = category.products.filter(is_active=True)
+
     return render(request, 'catalog/category_detail.html', {
         'category': category,
         'products': products,
