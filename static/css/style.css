@@ -285,3 +285,21 @@ h1 {
     text-transform: uppercase;
     letter-spacing: .06em;
 }
+
+/* постраничная навигация */
+.pagination .page-link {
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    margin: 0 .2rem;
+    background-color: var(--cream);
+}
+
+.pagination .active .page-link {
+    background-color: var(--ink);
+    color: var(--cream);
+}
+
+.pagination .disabled .page-link {
+    opacity: .45;
+}

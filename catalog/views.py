@@ -1,7 +1,10 @@
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
 from catalog.forms import ProductForm
 from catalog.models import Category, ContactInfo, Product
+
+PRODUCTS_PER_PAGE = 6
 
 
 def contacts(request):
@@ -20,7 +23,13 @@ def contacts(request):
 def home(request):
     products = Product.objects.all()
 
-    return render(request, 'catalog/home.html', {'products': products})
+    paginator = Paginator(products, PRODUCTS_PER_PAGE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'catalog/home.html', {
+        'products': page_obj,
+        'page_obj': page_obj,
+    })
 
 
 def product_detail(request, pk):
