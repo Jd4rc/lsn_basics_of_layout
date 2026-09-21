@@ -257,3 +257,12 @@ h1 {
     font-size: .8rem;
     letter-spacing: .08em;
 }
+
+/* ошибки валидации формы */
+.field-error {
+    margin-top: .35rem;
+    color: var(--pink-deep);
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
