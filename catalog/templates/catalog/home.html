@@ -45,33 +45,15 @@
     <section class="mb-5">
         <h2 class="section-title">Сейчас в наличии</h2>
         <div class="row g-4">
+            {% for product in products %}
             <div class="col-12 col-md-4">
-                <article class="card-ink h-100">
-                    <div class="card-ink__body">
-                        <h3 class="card-ink__title">Неон голубой</h3>
-                        <p class="card-ink__meta">Paracheirodon innesi · стайная · 3 см</p>
-                        <p class="card-ink__price">4 руб. / шт.</p>
-                    </div>
-                </article>
+                {% include 'catalog/includes/product_card.html' %}
             </div>
-            <div class="col-12 col-md-4">
-                <article class="card-ink h-100">
-                    <div class="card-ink__body">
-                        <h3 class="card-ink__title">Скалярия</h3>
-                        <p class="card-ink__meta">Pterophyllum scalare · парная · 15 см</p>
-                        <p class="card-ink__price">18 руб. / шт.</p>
-                    </div>
-                </article>
+            {% empty %}
+            <div class="col-12">
+                <p class="lead-serif">Товаров пока нет.</p>
             </div>
-            <div class="col-12 col-md-4">
-                <article class="card-ink h-100">
-                    <div class="card-ink__body">
-                        <h3 class="card-ink__title">Сомик коридорас</h3>
-                        <p class="card-ink__meta">Corydoras paleatus · донная · 6 см</p>
-                        <p class="card-ink__price">9 руб. / шт.</p>
-                    </div>
-                </article>
-            </div>
+            {% endfor %}
         </div>
     </section>
 

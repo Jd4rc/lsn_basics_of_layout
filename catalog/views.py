@@ -18,11 +18,9 @@ def contacts(request):
 
 
 def home(request):
-    latest_products = Product.objects.order_by('-created_at')[:5]
-    for product in latest_products:
-        print(product)
+    products = Product.objects.all()
 
-    return render(request, 'catalog/home.html')
+    return render(request, 'catalog/home.html', {'products': products})
 
 
 def product_detail(request, pk):

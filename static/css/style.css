@@ -197,6 +197,14 @@ h1 {
     border: 2px solid var(--ink);
 }
 
+.card-ink__img {
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--ink);
+}
+
 .card-ink__body {
     padding: 1.4rem;
 }
