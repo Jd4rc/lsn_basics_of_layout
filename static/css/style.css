@@ -11,6 +11,8 @@ body {
     font-family: 'Oswald', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: .02em;
+    /* длинное слово без пробелов переносится, а не вылезает за блок */
+    overflow-wrap: break-word;
 }
 
 /* зерно поверх страницы */
