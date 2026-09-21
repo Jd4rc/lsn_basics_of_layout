@@ -11,6 +11,8 @@ body {
     font-family: 'Oswald', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: .02em;
+    /* длинное слово без пробелов переносится, а не вылезает за блок */
+    overflow-wrap: break-word;
 }
 
 /* зерно поверх страницы */
@@ -197,6 +199,14 @@ h1 {
     border: 2px solid var(--ink);
 }
 
+.card-ink__img {
+    display: block;
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--ink);
+}
+
 .card-ink__body {
     padding: 1.4rem;
 }
@@ -256,4 +266,42 @@ h1 {
     text-transform: uppercase;
     font-size: .8rem;
     letter-spacing: .08em;
+}
+
+/* ссылки, не ломающие вид карточек и плиток */
+.tile-link,
+.card-ink__title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.card-ink__title a:hover {
+    text-decoration: underline;
+}
+
+/* ошибки валидации формы */
+.field-error {
+    margin-top: .35rem;
+    color: var(--pink-deep);
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+/* постраничная навигация */
+.pagination .page-link {
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+    margin: 0 .2rem;
+    background-color: var(--cream);
+}
+
+.pagination .active .page-link {
+    background-color: var(--ink);
+    color: var(--cream);
+}
+
+.pagination .disabled .page-link {
+    opacity: .45;
 }
