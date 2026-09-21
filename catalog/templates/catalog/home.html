@@ -28,34 +28,17 @@
     <section class="mb-5">
         <h2 class="section-title">Категории</h2>
         <div class="row g-4">
+            {% for category in menu_categories %}
             <div class="col-12 col-md-6 col-lg-3">
-                <article class="tile h-100">
-                    <span class="tile__num">01</span>
-                    <h3 class="tile__title">Аквариумы</h3>
-                    <p class="tile__text">От нано-кубов на 10 литров до травников на две сотни.</p>
-                </article>
+                <a href="{% url 'catalog:category_detail' category.slug %}" class="tile-link">
+                    <article class="tile h-100">
+                        <span class="tile__num">{{ forloop.counter|stringformat:"02d" }}</span>
+                        <h3 class="tile__title">{{ category.name }}</h3>
+                        <p class="tile__text">{{ category.description|truncatechars:100 }}</p>
+                    </article>
+                </a>
             </div>
-            <div class="col-12 col-md-6 col-lg-3">
-                <article class="tile h-100">
-                    <span class="tile__num">02</span>
-                    <h3 class="tile__title">Рыбки</h3>
-                    <p class="tile__text">Неоны, гуппи, скалярии, сомики и капризные дискусы.</p>
-                </article>
-            </div>
-            <div class="col-12 col-md-6 col-lg-3">
-                <article class="tile h-100">
-                    <span class="tile__num">03</span>
-                    <h3 class="tile__title">Растения</h3>
-                    <p class="tile__text">Анубиасы, криптокорины, мхи и почвопокровка для ковра.</p>
-                </article>
-            </div>
-            <div class="col-12 col-md-6 col-lg-3">
-                <article class="tile h-100">
-                    <span class="tile__num">04</span>
-                    <h3 class="tile__title">Оборудование</h3>
-                    <p class="tile__text">Фильтры, свет, CO₂, нагреватели и тесты воды.</p>
-                </article>
-            </div>
+            {% endfor %}
         </div>
     </section>
 

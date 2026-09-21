@@ -258,6 +258,17 @@ h1 {
     letter-spacing: .08em;
 }
 
+/* ссылки, не ломающие вид карточек и плиток */
+.tile-link,
+.card-ink__title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.card-ink__title a:hover {
+    text-decoration: underline;
+}
+
 /* ошибки валидации формы */
 .field-error {
     margin-top: .35rem;
