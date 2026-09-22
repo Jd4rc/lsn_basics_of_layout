@@ -1,0 +1,13 @@
+{# Карточка товара. Ожидает переменную product #}
+<article class="card-ink h-100">
+    {% if product.image %}
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-ink__img">
+    {% endif %}
+    <div class="card-ink__body">
+        <h3 class="card-ink__title">
+            <a href="{% url 'catalog:product_detail' product.pk %}">{{ product.name }}</a>
+        </h3>
+        <p class="card-ink__meta">{{ product.description|truncatechars:100 }}</p>
+        <p class="card-ink__price">{{ product.price }} руб.</p>
+    </div>
+</article>
