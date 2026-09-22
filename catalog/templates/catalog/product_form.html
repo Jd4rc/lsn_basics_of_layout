@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Добавить товар{% endblock %}
+{% block title %}{% if form.instance.pk %}Редактировать товар{% else %}Добавить товар{% endif %}{% endblock %}
 
 {% block content %}
 
-<h1>Добавить товар</h1>
+<h1>{% if form.instance.pk %}Редактировать товар{% else %}Добавить товар{% endif %}</h1>
 
 <form method="post" enctype="multipart/form-data" class="feedback" novalidate>
     {% csrf_token %}
@@ -31,7 +31,11 @@
     {% endfor %}
 
     <button type="submit" class="btn btn-ink">Сохранить</button>
+    {% if form.instance.pk %}
+    <a href="{% url 'catalog:product_detail' form.instance.pk %}" class="btn btn-ink">Отмена</a>
+    {% else %}
     <a href="{% url 'catalog:home' %}" class="btn btn-ink">Отмена</a>
+    {% endif %}
 </form>
 
 {% endblock %}

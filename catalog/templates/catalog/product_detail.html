@@ -29,6 +29,7 @@
     <li>Обновлён: {{ product.updated_at|date:"d.m.Y H:i" }}</li>
 </ul>
 
+<a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-ink">Редактировать</a>
 <a href="{% url 'catalog:home' %}" class="btn btn-ink">На главную</a>
 
 {% endblock %}
