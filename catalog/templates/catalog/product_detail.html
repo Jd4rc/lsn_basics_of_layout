@@ -30,6 +30,7 @@
 </ul>
 
 <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-ink">Редактировать</a>
+<a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-ink">Удалить</a>
 <a href="{% url 'catalog:home' %}" class="btn btn-ink">На главную</a>
 
 {% endblock %}

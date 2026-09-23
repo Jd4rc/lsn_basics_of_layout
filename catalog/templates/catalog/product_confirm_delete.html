@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Удалить {{ product.name }}{% endblock %}
+
+{% block content %}
+
+<h1>Удалить товар?</h1>
+
+<div class="notice mb-4">
+    <p class="mb-0">
+        Товар «{{ product.name }}» будет удалён без возможности восстановления.
+    </p>
+</div>
+
+<ul>
+    <li>Категория: {{ product.category }}</li>
+    <li>Цена: {{ product.price }} ₽</li>
+    <li>Остаток на складе: {{ product.stock }}</li>
+    <li>Добавлен: {{ product.created_at|date:"d.m.Y H:i" }}</li>
+</ul>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-ink">Удалить</button>
+    <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-ink">Отмена</a>
+</form>
+
+{% endblock %}

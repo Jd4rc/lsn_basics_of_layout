@@ -66,6 +66,16 @@ def product_update(request, pk):
     return render(request, 'catalog/product_form.html', {'form': form})
 
 
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        product.delete()
+        return redirect('catalog:home')
+
+    return render(request, 'catalog/product_confirm_delete.html', {'product': product})
+
+
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
     products = category.products.filter(is_active=True)
