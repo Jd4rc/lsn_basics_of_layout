@@ -62,3 +62,31 @@ class ProductForm(forms.ModelForm):
             raise forms.ValidationError('Цена должна быть больше нуля.')
 
         return price
+
+
+class ContactForm(forms.Form):
+    """Форма обратной связи на странице контактов."""
+
+    name = forms.CharField(
+        label='Имя',
+        max_length=100,
+        error_messages={
+            'required': 'Укажите имя.',
+            'max_length': 'Имя должно быть не длиннее %(limit_value)d символов.',
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control input-ink'}),
+    )
+    phone = forms.CharField(
+        label='Телефон',
+        max_length=20,
+        error_messages={
+            'required': 'Укажите телефон.',
+            'max_length': 'Телефон должен быть не длиннее %(limit_value)d символов.',
+        },
+        widget=forms.TextInput(attrs={'class': 'form-control input-ink', 'type': 'tel'}),
+    )
+    message = forms.CharField(
+        label='Сообщение',
+        error_messages={'required': 'Напишите сообщение.'},
+        widget=forms.Textarea(attrs={'class': 'form-control input-ink', 'rows': 4}),
+    )

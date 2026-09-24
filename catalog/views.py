@@ -1,23 +1,29 @@
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
-from catalog.forms import ProductForm
+from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
 
 PRODUCTS_PER_PAGE = 6
 
 
 def contacts(request):
-    contact_info = ContactInfo.objects.first()
-
     if request.method == 'POST':
-        name = request.POST.get('name')
-        phone = request.POST.get('phone')
-        message = request.POST.get('message')
-        print(f'Сообщение от {name} ({phone}): {message}')
-        return render(request, 'catalog/contacts.html', {'sent': True, 'contact_info': contact_info})
+        form = ContactForm(request.POST)
 
-    return render(request, 'catalog/contacts.html', {'contact_info': contact_info})
+        if form.is_valid():
+            data = form.cleaned_data
+            print(f"Сообщение от {data['name']} ({data['phone']}): {data['message']}")
+            messages.success(request, 'Спасибо! Мы свяжемся с тобой в ближайшее время.')
+            return redirect('catalog:contacts')
+    else:
+        form = ContactForm()
+
+    return render(request, 'catalog/contacts.html', {
+        'form': form,
+        'contact_info': ContactInfo.objects.first(),
+    })
 
 
 def home(request):
