@@ -1,8 +1,7 @@
 from django.contrib import messages
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
@@ -28,16 +27,17 @@ def contacts(request):
     })
 
 
-def home(request):
-    products = Product.objects.filter(is_active=True)
+class ProductListView(ListView):
+    queryset = Product.objects.filter(is_active=True)
+    template_name = 'catalog/home.html'
+    context_object_name = 'products'
+    paginate_by = PRODUCTS_PER_PAGE
 
-    paginator = Paginator(products, PRODUCTS_PER_PAGE)
-    page_obj = paginator.get_page(request.GET.get('page'))
-
-    return render(request, 'catalog/home.html', {
-        'products': page_obj,
-        'page_obj': page_obj,
-    })
+    def paginate_queryset(self, queryset, page_size):
+        # Кривой ?page= (abc, 999, 0) даёт ближайшую страницу, а не 404, как в ListView по умолчанию
+        paginator = self.get_paginator(queryset, page_size)
+        page = paginator.get_page(self.request.GET.get(self.page_kwarg))
+        return paginator, page, page.object_list, page.has_other_pages()
 
 
 class ProductDetailView(DetailView):
