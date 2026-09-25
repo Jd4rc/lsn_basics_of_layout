@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import DetailView
+from django.views.generic import CreateView, DetailView
 
 from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
@@ -43,17 +43,9 @@ class ProductDetailView(DetailView):
     model = Product
 
 
-def product_create(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            product = form.save()
-            return redirect('catalog:product_detail', pk=product.pk)
-    else:
-        form = ProductForm()
-
-    return render(request, 'catalog/product_form.html', {'form': form})
+class ProductCreateView(CreateView):
+    model = Product
+    form_class = ProductForm
 
 
 def product_update(request, pk):
