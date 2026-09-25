@@ -40,9 +40,11 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 ## Архитектура
 
 - `config/` — настройки проекта, `catalog/` — единственное приложение, в нём вся логика.
-- Вьюхи на функциях (FBV) — это сознательно, перевод на CBV отложен. Все вьюхи
-  устроены одинаково: ветвление по `request.method`, `get_object_or_404`, после
-  успешного POST — `redirect` (Post/Redirect/Get). `contacts` сообщает об успешной
+- Идёт перевод вьюх с функций (FBV) на generic CBV: по одной вьюхе на коммит, план
+  и грабли — в `TODO.md` (раздел 4). Новые вьюхи сразу пишем классами. Имена маршрутов
+  (`name=`) при переводе не меняются, поэтому `{% url %}` в шаблонах не трогаем.
+  Оставшиеся FBV устроены одинаково: ветвление по `request.method`,
+  `get_object_or_404`, после успешного POST — `redirect` (Post/Redirect/Get). `contacts` сообщает об успешной
   отправке через `django.contrib.messages`: после редиректа флаг в контексте теряется.
 - `product_create` и `product_update` используют один шаблон `product_form.html`,
   который различает режимы по `form.instance.pk`. Валидация `ProductForm` —
