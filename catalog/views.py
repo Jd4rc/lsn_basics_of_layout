@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import CreateView, DetailView, UpdateView
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
@@ -53,14 +54,9 @@ class ProductUpdateView(UpdateView):
     form_class = ProductForm
 
 
-def product_delete(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-
-    if request.method == 'POST':
-        product.delete()
-        return redirect('catalog:home')
-
-    return render(request, 'catalog/product_confirm_delete.html', {'product': product})
+class ProductDeleteView(DeleteView):
+    model = Product
+    success_url = reverse_lazy('catalog:home')
 
 
 def category_detail(request, slug):
