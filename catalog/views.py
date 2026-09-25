@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic import DetailView
 
 from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
@@ -38,10 +39,8 @@ def home(request):
     })
 
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-
-    return render(request, 'catalog/product_detail.html', {'product': product})
+class ProductDetailView(DetailView):
+    model = Product
 
 
 def product_create(request):
