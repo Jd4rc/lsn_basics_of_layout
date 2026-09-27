@@ -34,6 +34,7 @@ class Product(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Добавлен')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлён')
+    views_count = models.PositiveIntegerField(default=0, verbose_name='Просмотры')
 
     NEW = 'new'
     USED = 'used'

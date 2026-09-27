@@ -1,4 +1,5 @@
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
@@ -45,6 +46,13 @@ class ProductListView(NearestPageMixin, ListView):
 
 class ProductDetailView(DetailView):
     model = Product
+
+    def get_object(self, queryset=None):
+        product = super().get_object(queryset)
+        # update() с F(), а не save(): save() сдвинул бы updated_at (auto_now) при каждом просмотре
+        Product.objects.filter(pk=product.pk).update(views_count=F('views_count') + 1)
+        product.views_count += 1
+        return product
 
 
 class ProductCreateView(CreateView):

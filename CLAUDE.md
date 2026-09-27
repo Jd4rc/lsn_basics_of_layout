@@ -72,6 +72,8 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
   товара — `catalog/includes/product_card.html` (ждёт `product`).
 - В списках показываются только товары с `is_active=True`, страница товара по прямой
   ссылке открывается всегда.
+- Просмотры (`Product.views_count`) считает `ProductDetailView.get_object()` через
+  `update()` с `F()`, а не `save()`: `save()` сдвинул бы `updated_at` (`auto_now`).
 - `Product.category` — `on_delete=PROTECT`, `related_name='products'`: категорию
   с товарами удалить нельзя (`ProtectedError`), поэтому товары удаляются первыми.
 - Загруженные фото лежат в `media/products/` (в `.gitignore`). Django раздаёт их

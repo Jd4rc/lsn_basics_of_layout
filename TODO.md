@@ -46,7 +46,7 @@
 
 Разные причины изменения — разные коммиты.
 
-- [ ] **`print` в `ContactFormView.form_valid()`.** `views.py:25` — отладочный остаток, ему место в `logging`.
+- [ ] **`print` в `ContactFormView.form_valid()`.** `views.py:26` — отладочный остаток, ему место в `logging`.
       PRG, `ContactForm` и перевод на `FormView` уже сделаны, остался только он.
       → `refactor: log contact messages instead of print`
 

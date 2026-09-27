@@ -27,6 +27,7 @@
     <li>В продаже: {{ product.is_active|yesno:"да,нет" }}</li>
     <li>Добавлен: {{ product.created_at|date:"d.m.Y H:i" }}</li>
     <li>Обновлён: {{ product.updated_at|date:"d.m.Y H:i" }}</li>
+    <li>Просмотры: {{ product.views_count }}</li>
 </ul>
 
 <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-ink">Редактировать</a>
