@@ -22,6 +22,8 @@
     {% endfor %}
 </div>
 
+{% include 'includes/pagination.html' %}
+
 <a href="{% url 'catalog:home' %}" class="btn btn-ink mt-4">На главную</a>
 
 {% endblock %}

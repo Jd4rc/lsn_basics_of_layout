@@ -7,11 +7,21 @@
 | Операция | Статус | Коммит | На CBV |
 |---|---|---|---|
 | Create | ✅ | было до этой работы | `3cf2afb` |
-| Read (список + карточка) | ✅ | было до этой работы | карточка `382ad60`, главная `refactor: convert home to ListView` |
+| Read (список + карточка) | ✅ | было до этой работы | карточка `382ad60`, главная `refactor: convert home to ListView`, категория `refactor: convert category_detail to ListView` |
 | Update | ✅ | `7b0bcab` | `5421d3b` |
 | Delete | ✅ | `f0e18e9` | `e10ae2a` |
 
 ---
+
+## 2026-09-27 · Категория на `ListView` · `refactor: convert category_detail to ListView`
+
+- `category_detail` → `CategoryProductListView(NearestPageMixin, ListView)`: `get_queryset()`
+  ищет категорию по слагу, `get_context_data()` отдаёт её в шаблон. В `category_detail.html` — пагинация.
+- `paginate_queryset()` из `ProductListView` вынесен в `NearestPageMixin`, главная — на нём же.
+
+**Знать:** `get_object_or_404` — внутри `get_queryset()`, иначе `<slug:slug>/` на мусорный путь
+отдаст пустую «категорию» с кодом 200. Категорию там же кладём на `self`: `get_queryset()`
+вызывается раньше `get_context_data()`. Миксин — левее `ListView`, справа молча не сработает.
 
 ## 2026-09-25 · Главная на `ListView` · `refactor: convert home to ListView`
 
@@ -143,3 +153,6 @@ Django специально так делает с версии 1.3 — на о�
 страницы и поведение те же. Выигрыш внутри: вьюхи стали декларациями на 2–5 строк,
 вся механика (404, `instance`, `request.FILES`, редиректы, пагинация) — в Django,
 а не в нашем коде.
+
+Категория теперь листается по 6 товаров, как главная, а кривой `?page=` не даёт 404.
+Раньше выводилось всё разом — пока в категориях до 4 товаров, разницы не видно.

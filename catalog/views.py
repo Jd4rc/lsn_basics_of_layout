@@ -27,17 +27,21 @@ def contacts(request):
     })
 
 
-class ProductListView(ListView):
-    queryset = Product.objects.filter(is_active=True)
-    template_name = 'catalog/home.html'
-    context_object_name = 'products'
-    paginate_by = PRODUCTS_PER_PAGE
+class NearestPageMixin:
+    """Пагинация без 404: ставится левее ListView."""
 
     def paginate_queryset(self, queryset, page_size):
         # Кривой ?page= (abc, 999, 0) даёт ближайшую страницу, а не 404, как в ListView по умолчанию
         paginator = self.get_paginator(queryset, page_size)
         page = paginator.get_page(self.request.GET.get(self.page_kwarg))
         return paginator, page, page.object_list, page.has_other_pages()
+
+
+class ProductListView(NearestPageMixin, ListView):
+    queryset = Product.objects.filter(is_active=True)
+    template_name = 'catalog/home.html'
+    context_object_name = 'products'
+    paginate_by = PRODUCTS_PER_PAGE
 
 
 class ProductDetailView(DetailView):
@@ -59,11 +63,17 @@ class ProductDeleteView(DeleteView):
     success_url = reverse_lazy('catalog:home')
 
 
-def category_detail(request, slug):
-    category = get_object_or_404(Category, slug=slug)
-    products = category.products.filter(is_active=True)
+class CategoryProductListView(NearestPageMixin, ListView):
+    template_name = 'catalog/category_detail.html'
+    context_object_name = 'products'
+    paginate_by = PRODUCTS_PER_PAGE
 
-    return render(request, 'catalog/category_detail.html', {
-        'category': category,
-        'products': products,
-    })
+    def get_queryset(self):
+        # 404 на несуществующий слаг, иначе <slug:slug>/ отдаст пустую «категорию» с кодом 200
+        self.category = get_object_or_404(Category, slug=self.kwargs['slug'])
+        return self.category.products.filter(is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        return context

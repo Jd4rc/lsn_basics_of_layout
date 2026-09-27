@@ -56,12 +56,6 @@
       Чинить: префикс `categories/<slug:slug>/` либо запрет таких слагов в валидации.
       → `fix: avoid slug catch-all shadowing static urls`
 
-- [ ] **`category_detail` без пагинации.** `views.py` — `PRODUCTS_PER_PAGE` объявлена,
-      `templates/includes/pagination.html` написан, а в категории выводится всё разом.
-      Один и тот же Read собран двумя способами.
-      Закрывается переводом `category_detail` на `ListView` (раздел 4) — отдельно не делать.
-      → `refactor: paginate category product list`
-
 - [ ] **Адрес товара собирается вручную в 3 шаблонах**, хотя есть `get_absolute_url()` (`9eef2a5`).
       Во вьюхах ручных `redirect` больше нет: `CreateView` / `UpdateView` редиректят через него сами.
       `product_card.html:8`, `product_confirm_delete.html:25` — `{% url 'catalog:product_detail' product.pk %}`
@@ -96,20 +90,16 @@
 на удалённую функцию и сайт не стартанёт). Имена маршрутов (`name=`) не меняем —
 тогда все `{% url %}` в шаблонах работают без правок.
 
-CRUD товара и главная уже переведены (`ProductListView`, `ProductDetailView`,
-`ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`) — что и как, в `MADE.md`.
-Осталось две:
+CRUD товара, главная и категория уже переведены (`ProductListView`, `ProductDetailView`,
+`ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`, `CategoryProductListView`) —
+что и как, в `MADE.md`. Осталась одна:
 
 | Функция | Класс | Что пишешь сам |
 |---|---|---|
-| `category_detail` | `ListView` | `template_name`, `context_object_name`, `get_queryset()`, `get_context_data()`, `paginate_by` |
 | `contacts` | `SuccessMessageMixin` + `FormView` | `form_class`, `success_url`, `success_message`, `get_context_data()`, `form_valid()` |
 
-- [ ] `category_detail` → `ListView` (заодно закрывает пагинацию из раздела 2:
-      `paginate_by` + `{% include 'includes/pagination.html' %}`).
-      Кривой `?page=` — как на главной (последний пункт граблей ниже)
 - [ ] `contacts` → `FormView` — `ContactForm` и `messages` уже есть, перевод механический
-- [ ] → `refactor: convert <view> to <Class>` на каждый
+      → `refactor: convert contacts to FormView`
 - [ ] После последней — `CLAUDE.md`: убрать «идёт перевод» и описание оставшихся FBV
       → `docs: update CLAUDE.md after CBV migration`
 
@@ -120,16 +110,9 @@ CRUD товара и главная уже переведены (`ProductListVie
 - `form_class` и `fields` одновременно нельзя → `ImproperlyConfigured`.
 - Переопределил `form_valid()` → обязательно `return super().form_valid(form)`,
   иначе ни сохранения, ни редиректа.
-- Миксины (`LoginRequiredMixin`, `SuccessMessageMixin`) — **левее** базового класса.
-  Справа молча не работают. Права из раздела 1 на CBV = `LoginRequiredMixin`
-  (он и есть проверка на `dispatch()`, срабатывает на GET и POST разом).
-- `category_detail`: `get_object_or_404(Category, ...)` внутри `get_queryset()` обязателен —
-  иначе `<slug:slug>/` на любой мусорный путь отдаст пустую «категорию» с кодом 200.
-  `template_name` задавать явно: дефолт был бы `catalog/product_list.html`.
-- `ListView` на кривой `?page=999` / `?page=abc` отдаёт **404**. На главной решили
-  подставлять ближайшую страницу: `ProductListView.paginate_queryset()` берёт её через
-  `paginator.get_page()`. Категория должна вести себя так же — чтобы не копировать метод,
-  вынести его в общий миксин (левее `ListView`) и подключить в обоих классах.
+- Миксины (`LoginRequiredMixin`, `SuccessMessageMixin`, наш `NearestPageMixin`) —
+  **левее** базового класса. Справа молча не работают. Права из раздела 1 на CBV =
+  `LoginRequiredMixin` (он и есть проверка на `dispatch()`, срабатывает на GET и POST разом).
 
 ---
 

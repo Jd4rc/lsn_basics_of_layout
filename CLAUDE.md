@@ -43,13 +43,16 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 - Идёт перевод вьюх с функций (FBV) на generic CBV: по одной вьюхе на коммит, план
   и грабли — в `TODO.md` (раздел 4). Новые вьюхи сразу пишем классами. Имена маршрутов
   (`name=`) при переводе не меняются, поэтому `{% url %}` в шаблонах не трогаем.
-  CRUD товара и главная уже на классах: `ProductListView`, `ProductDetailView`,
-  `ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`.
+  CRUD товара, главная и категория уже на классах: `ProductListView`,
+  `ProductDetailView`, `ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`,
+  `CategoryProductListView`.
   Имена — `<Модель><Действие>View`, шаблоны —
   по дефолтным именам Django (`<model>_detail.html`, `_form.html`, `_confirm_delete.html`),
   `template_name` задаём, только если имя другое.
-  Оставшиеся FBV устроены одинаково: ветвление по `request.method`,
-  `get_object_or_404`, после успешного POST — `redirect` (Post/Redirect/Get).
+  Списки с пагинацией — через `NearestPageMixin` (левее `ListView`): кривой `?page=`
+  даёт ближайшую страницу, а не 404.
+  Оставшиеся FBV устроены так: ветвление по `request.method`, после успешного POST —
+  `redirect` (Post/Redirect/Get).
   `contacts` сообщает об успешной отправке через `django.contrib.messages`: после
   редиректа флаг в контексте теряется.
 - `ProductCreateView` и `ProductUpdateView` используют один шаблон `product_form.html`
