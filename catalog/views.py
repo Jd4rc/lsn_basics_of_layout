@@ -1,7 +1,7 @@
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 
 from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
@@ -9,22 +9,21 @@ from catalog.models import Category, ContactInfo, Product
 PRODUCTS_PER_PAGE = 6
 
 
-def contacts(request):
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
+class ContactFormView(SuccessMessageMixin, FormView):
+    form_class = ContactForm
+    template_name = 'catalog/contacts.html'
+    success_url = reverse_lazy('catalog:contacts')
+    success_message = 'Спасибо! Мы свяжемся с тобой в ближайшее время.'
 
-        if form.is_valid():
-            data = form.cleaned_data
-            print(f"Сообщение от {data['name']} ({data['phone']}): {data['message']}")
-            messages.success(request, 'Спасибо! Мы свяжемся с тобой в ближайшее время.')
-            return redirect('catalog:contacts')
-    else:
-        form = ContactForm()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contact_info'] = ContactInfo.objects.first()
+        return context
 
-    return render(request, 'catalog/contacts.html', {
-        'form': form,
-        'contact_info': ContactInfo.objects.first(),
-    })
+    def form_valid(self, form):
+        data = form.cleaned_data
+        print(f"Сообщение от {data['name']} ({data['phone']}): {data['message']}")
+        return super().form_valid(form)
 
 
 class NearestPageMixin:

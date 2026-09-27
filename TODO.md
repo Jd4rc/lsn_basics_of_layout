@@ -8,7 +8,7 @@
 
 ## Где мы сейчас
 
-**CRUD для `Product` закрыт полностью и уже на классах (CBV).** Все три модели есть в `catalog/admin.py`,
+**CRUD для `Product` закрыт полностью, все вьюхи — на классах (CBV).** Все три модели есть в `catalog/admin.py`,
 так что у персонала CRUD полный и по остальным.
 
 | Модель | Create | Read | Update | Delete |
@@ -46,8 +46,8 @@
 
 Разные причины изменения — разные коммиты.
 
-- [ ] **`print` в `contacts`.** `views.py:18` — отладочный остаток, ему место в `logging`.
-      PRG и `ContactForm` уже сделаны (`0e10b8f`), остался только он.
+- [ ] **`print` в `ContactFormView.form_valid()`.** `views.py:25` — отладочный остаток, ему место в `logging`.
+      PRG, `ContactForm` и перевод на `FormView` уже сделаны, остался только он.
       → `refactor: log contact messages instead of print`
 
 - [ ] **`<slug:slug>/` в `urls.py` — мина.** Матчит любой односегментный путь.
@@ -65,7 +65,8 @@
 
 - [ ] **Форма обратной связи ничего не сохраняет** — печатает в консоль.
       Решить: делать модель `Feedback` (тогда это настоящий Create) или так и оставить.
-      Если модель — `ContactForm` превращается в `ModelForm` с `Meta.fields`.
+      Если модель — `ContactForm` превращается в `ModelForm` с `Meta.fields`,
+      а `ContactFormView` — в `CreateView` (`SuccessMessageMixin` остаётся).
 
 ---
 
@@ -74,45 +75,13 @@
 - [ ] **CRUD для Category на сайте.** Сейчас только админка, и этого может быть
       достаточно — категории заводит владелец магазина, не посетитель.
       Решить сознательно, а не забыть.
-      Помнить: `on_delete=models.PROTECT` (`models.py:20`) не даст удалить категорию
+      Помнить: `on_delete=models.PROTECT` (`models.py:21`) не даст удалить категорию
       с товарами — упадёт `ProtectedError`, его придётся ловить, иначе 500.
 
 - [ ] **Осиротевшие картинки.** `product.delete()` не трогает файлы в `media/products/`.
       Копятся после каждого удаления. Чинится сигналом `post_delete` или чисткой по расписанию.
       На CBV — ещё вариант: `self.object.image.delete(save=False)` в
       `ProductDeleteView.form_valid()` после `super()` (почему там — `MADE.md`, запись про CBV).
-
----
-
-## 4. Перевод на CBV — идёт
-
-**По одной вьюхе на коммит**, `views.py` и `urls.py` вместе (иначе `urls.py` сошлётся
-на удалённую функцию и сайт не стартанёт). Имена маршрутов (`name=`) не меняем —
-тогда все `{% url %}` в шаблонах работают без правок.
-
-CRUD товара, главная и категория уже переведены (`ProductListView`, `ProductDetailView`,
-`ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`, `CategoryProductListView`) —
-что и как, в `MADE.md`. Осталась одна:
-
-| Функция | Класс | Что пишешь сам |
-|---|---|---|
-| `contacts` | `SuccessMessageMixin` + `FormView` | `form_class`, `success_url`, `success_message`, `get_context_data()`, `form_valid()` |
-
-- [ ] `contacts` → `FormView` — `ContactForm` и `messages` уже есть, перевод механический
-      → `refactor: convert contacts to FormView`
-- [ ] После последней — `CLAUDE.md`: убрать «идёт перевод» и описание оставшихся FBV
-      → `docs: update CLAUDE.md after CBV migration`
-
-**Грабли, которые уже разобраны:**
-
-- `success_url` в атрибуте класса — только `reverse_lazy`: класс создаётся при импорте
-  `views.py`, URL-ы ещё не загружены. Зависит от объекта (`pk`) → `get_success_url()`.
-- `form_class` и `fields` одновременно нельзя → `ImproperlyConfigured`.
-- Переопределил `form_valid()` → обязательно `return super().form_valid(form)`,
-  иначе ни сохранения, ни редиректа.
-- Миксины (`LoginRequiredMixin`, `SuccessMessageMixin`, наш `NearestPageMixin`) —
-  **левее** базового класса. Справа молча не работают. Права из раздела 1 на CBV =
-  `LoginRequiredMixin` (он и есть проверка на `dispatch()`, срабатывает на GET и POST разом).
 
 ---
 
