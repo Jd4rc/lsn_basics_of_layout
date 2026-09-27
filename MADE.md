@@ -13,6 +13,12 @@
 
 ---
 
+## 2026-09-27 · README под сдачу · `docs: update README`
+
+- Таблица страниц с колонкой «Вьюха» и маршрутами правки и удаления, новые разделы «Вьюхи»,
+  «Удаление товара», «Известные ограничения»; описание контактов и формы товара — под CBV.
+- Убрано устаревшее: `catalog.views.contacts`, «валидация и редирект пока не реализованы».
+
 ## 2026-09-27 · Контакты на `FormView` · `refactor: convert contacts to FormView`
 
 - `contacts` → `ContactFormView(SuccessMessageMixin, FormView)`: `get_context_data()` добавляет
