@@ -40,21 +40,22 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 ## Архитектура
 
 - `config/` — настройки проекта, `catalog/` — единственное приложение, в нём вся логика.
-- Идёт перевод вьюх с функций (FBV) на generic CBV: по одной вьюхе на коммит, план
-  и грабли — в `TODO.md` (раздел 4). Новые вьюхи сразу пишем классами. Имена маршрутов
-  (`name=`) при переводе не меняются, поэтому `{% url %}` в шаблонах не трогаем.
-  CRUD товара, главная и категория уже на классах: `ProductListView`,
-  `ProductDetailView`, `ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`,
-  `CategoryProductListView`.
-  Имена — `<Модель><Действие>View`, шаблоны —
-  по дефолтным именам Django (`<model>_detail.html`, `_form.html`, `_confirm_delete.html`),
-  `template_name` задаём, только если имя другое.
-  Списки с пагинацией — через `NearestPageMixin` (левее `ListView`): кривой `?page=`
-  даёт ближайшую страницу, а не 404.
-  Оставшиеся FBV устроены так: ветвление по `request.method`, после успешного POST —
-  `redirect` (Post/Redirect/Get).
-  `contacts` сообщает об успешной отправке через `django.contrib.messages`: после
-  редиректа флаг в контексте теряется.
+- Все вьюхи — generic CBV: `ProductListView`, `ProductDetailView`, `ProductCreateView`,
+  `ProductUpdateView`, `ProductDeleteView`, `CategoryProductListView`, `ContactFormView`.
+  Новые пишем так же. Имена — `<Модель><Действие>View` (у формы без модели — по форме),
+  шаблоны — по дефолтным именам Django (`<model>_detail.html`, `_form.html`,
+  `_confirm_delete.html`), `template_name` задаём, только если имя другое.
+- Грабли CBV: миксины (`LoginRequiredMixin`, `SuccessMessageMixin`, `NearestPageMixin`)
+  ставятся левее базового класса, справа молча не работают. `success_url` в атрибуте
+  класса — только `reverse_lazy` (атрибут вычисляется при импорте, URL-ы ещё не
+  загружены), зависит от объекта — `get_success_url()`. Переопределённый `form_valid()`
+  возвращает `super().form_valid(form)`, иначе ни сохранения, ни редиректа.
+  `form_class` и `fields` вместе — `ImproperlyConfigured`.
+- Списки с пагинацией — через `NearestPageMixin`: кривой `?page=` даёт ближайшую
+  страницу, а не 404.
+- После успешного POST — редирект (Post/Redirect/Get). `ContactFormView` сообщает
+  об отправке через `SuccessMessageMixin` (`django.contrib.messages`): после редиректа
+  контекст теряется.
 - `ProductCreateView` и `ProductUpdateView` используют один шаблон `product_form.html`
   (дефолтное имя у обоих), который различает режимы по `form.instance.pk`.
   Валидация `ProductForm` — в методах `clean_<поле>`, CSS-классы полей задаются
