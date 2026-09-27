@@ -43,8 +43,9 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 - Идёт перевод вьюх с функций (FBV) на generic CBV: по одной вьюхе на коммит, план
   и грабли — в `TODO.md` (раздел 4). Новые вьюхи сразу пишем классами. Имена маршрутов
   (`name=`) при переводе не меняются, поэтому `{% url %}` в шаблонах не трогаем.
-  CRUD товара уже на классах: `ProductDetailView`, `ProductCreateView`,
-  `ProductUpdateView`, `ProductDeleteView`. Имена — `<Модель><Действие>View`, шаблоны —
+  CRUD товара и главная уже на классах: `ProductListView`, `ProductDetailView`,
+  `ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`.
+  Имена — `<Модель><Действие>View`, шаблоны —
   по дефолтным именам Django (`<model>_detail.html`, `_form.html`, `_confirm_delete.html`),
   `template_name` задаём, только если имя другое.
   Оставшиеся FBV устроены одинаково: ветвление по `request.method`,

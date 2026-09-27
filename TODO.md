@@ -46,7 +46,7 @@
 
 Разные причины изменения — разные коммиты.
 
-- [ ] **`print` в `contacts`.** `views.py:19` — отладочный остаток, ему место в `logging`.
+- [ ] **`print` в `contacts`.** `views.py:18` — отладочный остаток, ему место в `logging`.
       PRG и `ContactForm` уже сделаны (`0e10b8f`), остался только он.
       → `refactor: log contact messages instead of print`
 
@@ -96,19 +96,18 @@
 на удалённую функцию и сайт не стартанёт). Имена маршрутов (`name=`) не меняем —
 тогда все `{% url %}` в шаблонах работают без правок.
 
-CRUD товара уже переведён (`ProductDetailView`, `ProductCreateView`, `ProductUpdateView`,
-`ProductDeleteView`) — что и как, в `MADE.md`. Осталось три:
+CRUD товара и главная уже переведены (`ProductListView`, `ProductDetailView`,
+`ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`) — что и как, в `MADE.md`.
+Осталось две:
 
 | Функция | Класс | Что пишешь сам |
 |---|---|---|
-| `home` | `ListView` | `queryset`, `template_name`, `context_object_name = 'products'`, `paginate_by` |
-| `category_detail` | `ListView` | `template_name`, `context_object_name`, `get_queryset()`, `get_context_data()` |
+| `category_detail` | `ListView` | `template_name`, `context_object_name`, `get_queryset()`, `get_context_data()`, `paginate_by` |
 | `contacts` | `SuccessMessageMixin` + `FormView` | `form_class`, `success_url`, `success_message`, `get_context_data()`, `form_valid()` |
 
-- [ ] `home` → `ListView`, уходят ручной `Paginator` и двойная передача `page_obj`.
-      Сначала решить, что делать с кривым `?page=` (последний пункт граблей ниже)
 - [ ] `category_detail` → `ListView` (заодно закрывает пагинацию из раздела 2:
-      `paginate_by` + `{% include 'includes/pagination.html' %}`)
+      `paginate_by` + `{% include 'includes/pagination.html' %}`).
+      Кривой `?page=` — как на главной (последний пункт граблей ниже)
 - [ ] `contacts` → `FormView` — `ContactForm` и `messages` уже есть, перевод механический
 - [ ] → `refactor: convert <view> to <Class>` на каждый
 - [ ] После последней — `CLAUDE.md`: убрать «идёт перевод» и описание оставшихся FBV
@@ -127,10 +126,10 @@ CRUD товара уже переведён (`ProductDetailView`, `ProductCreate
 - `category_detail`: `get_object_or_404(Category, ...)` внутри `get_queryset()` обязателен —
   иначе `<slug:slug>/` на любой мусорный путь отдаст пустую «категорию» с кодом 200.
   `template_name` задавать явно: дефолт был бы `catalog/product_list.html`.
-- `ListView` на кривой `?page=999` / `?page=abc` отдаёт **404**, а сейчас
-  `paginator.get_page()` молча подставляет ближайшую страницу — у `home` поведение изменится.
-  Либо принять 404 (дефолт Django), либо переопределить `paginate_queryset()`
-  и взять страницу через `paginator.get_page()`, как сейчас.
+- `ListView` на кривой `?page=999` / `?page=abc` отдаёт **404**. На главной решили
+  подставлять ближайшую страницу: `ProductListView.paginate_queryset()` берёт её через
+  `paginator.get_page()`. Категория должна вести себя так же — чтобы не копировать метод,
+  вынести его в общий миксин (левее `ListView`) и подключить в обоих классах.
 
 ---
 
