@@ -13,6 +13,19 @@
 
 ---
 
+## 2026-09-27 · Письмо на 100 просмотров · `feat: email owner when product hits 100 views`
+
+- `catalog/emails.py` — `send_views_milestone_email()`: тема, текст со ссылкой, получатель `OWNER_EMAIL`;
+  ошибка SMTP (`OSError`) пишется в лог, страница не падает.
+- `ProductDetailView.get_object()` — `UPDATE` и чтение нового значения в одной `transaction.atomic()`,
+  на `VIEWS_MILESTONE = 100` шлёт письмо. `settings.py` — `MAILERS`: SMTP из `.env` или console.
+- `.env.example`, `README.md` (раздел «Письмо на 100 просмотров»), `CLAUDE.md`.
+
+**Знать:** в Django 6.1 почта — `MAILERS` с `OPTIONS` (`host`, `port`, `use_ssl`, `timeout`), `EMAIL_*`
+устарели. Читать счётчик после `UPDATE` надо в той же транзакции: `UPDATE` держит строку, и
+каждый запрос видит своё значение — 20 одновременных открытий с 90 дали одно письмо. Без
+`timeout` недоступный SMTP подвесил бы страницу. В консоли письмо в base64 — это нормально.
+
 ## 2026-09-27 · Счётчик просмотров товара · `feat: count product views`
 
 - `Product.views_count` (`PositiveIntegerField`, `default=0`), миграция `0005_product_views_count`,

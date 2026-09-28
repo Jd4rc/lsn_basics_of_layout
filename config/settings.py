@@ -126,8 +126,28 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Без EMAIL_HOST в .env письма не уходят, а печатаются в консоль runserver
+if os.environ.get('EMAIL_HOST'):
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+            'OPTIONS': {
+                'host': os.environ['EMAIL_HOST'],
+                'port': int(os.environ.get('EMAIL_PORT', 465)),
+                'username': os.environ.get('EMAIL_HOST_USER'),
+                'password': os.environ.get('EMAIL_HOST_PASSWORD'),
+                'use_ssl': True,  # порт 465
+                'timeout': 10,  # без него недоступный SMTP подвесит страницу товара
+            },
+        },
+    }
+else:
+    MAILERS = {
+        'default': {
+            'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        },
+    }
+
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_HOST_USER') or 'webmaster@localhost'
+# Кому уходят письма магазина (поздравление со 100 просмотрами). По умолчанию — себе
+OWNER_EMAIL = os.environ.get('OWNER_EMAIL') or DEFAULT_FROM_EMAIL

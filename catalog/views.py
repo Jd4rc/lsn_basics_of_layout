@@ -1,13 +1,16 @@
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 
+from catalog.emails import send_views_milestone_email
 from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
 
 PRODUCTS_PER_PAGE = 6
+VIEWS_MILESTONE = 100
 
 
 class ContactFormView(SuccessMessageMixin, FormView):
@@ -49,9 +52,14 @@ class ProductDetailView(DetailView):
 
     def get_object(self, queryset=None):
         product = super().get_object(queryset)
-        # update() с F(), а не save(): save() сдвинул бы updated_at (auto_now) при каждом просмотре
-        Product.objects.filter(pk=product.pk).update(views_count=F('views_count') + 1)
-        product.views_count += 1
+        # update() с F(), а не save(): save() сдвинул бы updated_at (auto_now) при каждом просмотре.
+        # UPDATE держит строку до конца транзакции, поэтому каждый запрос читает своё новое
+        # значение: при одновременных открытиях VIEWS_MILESTONE увидит ровно один
+        with transaction.atomic():
+            Product.objects.filter(pk=product.pk).update(views_count=F('views_count') + 1)
+            product.refresh_from_db(fields=['views_count'])
+        if product.views_count == VIEWS_MILESTONE:
+            send_views_milestone_email(product, self.request.build_absolute_uri(product.get_absolute_url()))
         return product
 
 

@@ -46,8 +46,9 @@
 
 Разные причины изменения — разные коммиты.
 
-- [ ] **`print` в `ContactFormView.form_valid()`.** `views.py:26` — отладочный остаток, ему место в `logging`.
+- [ ] **`print` в `ContactFormView.form_valid()`.** `views.py:29` — отладочный остаток, ему место в `logging`.
       PRG, `ContactForm` и перевод на `FormView` уже сделаны, остался только он.
+      Логгер — как в `catalog/emails.py`: `logging.getLogger(__name__)`.
       → `refactor: log contact messages instead of print`
 
 - [ ] **`<slug:slug>/` в `urls.py` — мина.** Матчит любой односегментный путь.
@@ -83,6 +84,10 @@
       Копятся после каждого удаления. Чинится сигналом `post_delete` или чисткой по расписанию.
       На CBV — ещё вариант: `self.object.image.delete(save=False)` в
       `ProductDeleteView.form_valid()` после `super()` (почему там — `MADE.md`, запись про CBV).
+
+- [ ] **Письмо на 100 просмотров уходит внутри запроса.** Сотый посетитель ждёт SMTP,
+      при недоступном сервере — до `timeout` (10 с) из `MAILERS`. Для учебного проекта
+      нормально, на бою — очередь задач (Celery) и отправка в фоне.
 
 ---
 

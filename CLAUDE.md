@@ -36,6 +36,9 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 - Без `.env` с `SECRET_KEY` ничего не запустится: `settings.py` читает его через
   `os.environ['SECRET_KEY']`. Оттуда же берутся `DEBUG` и `DB_*`. `ALLOWED_HOSTS`
   в `.env.example` есть, но настройки его не читают: список захардкожен в `settings.py`.
+- Почта настроена через `MAILERS` (формат Django 6.1, не `EMAIL_*`). Без `EMAIL_HOST`
+  в `.env` работает console backend: письма печатаются в консоль `runserver`, тема
+  и тело — в base64.
 
 ## Архитектура
 
@@ -74,6 +77,9 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
   ссылке открывается всегда.
 - Просмотры (`Product.views_count`) считает `ProductDetailView.get_object()` через
   `update()` с `F()`, а не `save()`: `save()` сдвинул бы `updated_at` (`auto_now`).
+  Новое значение читается в той же транзакции, что и `UPDATE`: только так письмо
+  на `VIEWS_MILESTONE` (`catalog/emails.py`) уходит ровно один раз при одновременных
+  открытиях.
 - `Product.category` — `on_delete=PROTECT`, `related_name='products'`: категорию
   с товарами удалить нельзя (`ProtectedError`), поэтому товары удаляются первыми.
 - Загруженные фото лежат в `media/products/` (в `.gitignore`). Django раздаёт их
