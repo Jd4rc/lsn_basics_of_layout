@@ -1,61 +1,94 @@
-from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.messages.views import SuccessMessageMixin
+from django.db import transaction
+from django.db.models import F
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 
-from catalog.forms import ProductForm
+from catalog.emails import send_views_milestone_email
+from catalog.forms import ContactForm, ProductForm
 from catalog.models import Category, ContactInfo, Product
 
 PRODUCTS_PER_PAGE = 6
+VIEWS_MILESTONE = 100
 
 
-def contacts(request):
-    contact_info = ContactInfo.objects.first()
+class ContactFormView(SuccessMessageMixin, FormView):
+    form_class = ContactForm
+    template_name = 'catalog/contacts.html'
+    success_url = reverse_lazy('catalog:contacts')
+    success_message = 'Спасибо! Мы свяжемся с тобой в ближайшее время.'
 
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        phone = request.POST.get('phone')
-        message = request.POST.get('message')
-        print(f'Сообщение от {name} ({phone}): {message}')
-        return render(request, 'catalog/contacts.html', {'sent': True, 'contact_info': contact_info})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['contact_info'] = ContactInfo.objects.first()
+        return context
 
-    return render(request, 'catalog/contacts.html', {'contact_info': contact_info})
-
-
-def home(request):
-    products = Product.objects.filter(is_active=True)
-
-    paginator = Paginator(products, PRODUCTS_PER_PAGE)
-    page_obj = paginator.get_page(request.GET.get('page'))
-
-    return render(request, 'catalog/home.html', {
-        'products': page_obj,
-        'page_obj': page_obj,
-    })
+    def form_valid(self, form):
+        data = form.cleaned_data
+        print(f"Сообщение от {data['name']} ({data['phone']}): {data['message']}")
+        return super().form_valid(form)
 
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
+class NearestPageMixin:
+    """Пагинация без 404: ставится левее ListView."""
 
-    return render(request, 'catalog/product_detail.html', {'product': product})
-
-
-def product_create(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            product = form.save()
-            return redirect('catalog:product_detail', pk=product.pk)
-    else:
-        form = ProductForm()
-
-    return render(request, 'catalog/product_form.html', {'form': form})
+    def paginate_queryset(self, queryset, page_size):
+        # Кривой ?page= (abc, 999, 0) даёт ближайшую страницу, а не 404, как в ListView по умолчанию
+        paginator = self.get_paginator(queryset, page_size)
+        page = paginator.get_page(self.request.GET.get(self.page_kwarg))
+        return paginator, page, page.object_list, page.has_other_pages()
 
 
-def category_detail(request, slug):
-    category = get_object_or_404(Category, slug=slug)
-    products = category.products.filter(is_active=True)
+class ProductListView(NearestPageMixin, ListView):
+    queryset = Product.objects.filter(is_active=True)
+    template_name = 'catalog/home.html'
+    context_object_name = 'products'
+    paginate_by = PRODUCTS_PER_PAGE
 
-    return render(request, 'catalog/category_detail.html', {
-        'category': category,
-        'products': products,
-    })
+
+class ProductDetailView(DetailView):
+    model = Product
+
+    def get_object(self, queryset=None):
+        product = super().get_object(queryset)
+        # update() с F(), а не save(): save() сдвинул бы updated_at (auto_now) при каждом просмотре.
+        # UPDATE держит строку до конца транзакции, поэтому каждый запрос читает своё новое
+        # значение: при одновременных открытиях VIEWS_MILESTONE увидит ровно один
+        with transaction.atomic():
+            Product.objects.filter(pk=product.pk).update(views_count=F('views_count') + 1)
+            product.refresh_from_db(fields=['views_count'])
+        if product.views_count == VIEWS_MILESTONE:
+            send_views_milestone_email(product, self.request.build_absolute_uri(product.get_absolute_url()))
+        return product
+
+
+class ProductCreateView(CreateView):
+    model = Product
+    form_class = ProductForm
+
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    form_class = ProductForm
+
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    success_url = reverse_lazy('catalog:home')
+
+
+class CategoryProductListView(NearestPageMixin, ListView):
+    template_name = 'catalog/category_detail.html'
+    context_object_name = 'products'
+    paginate_by = PRODUCTS_PER_PAGE
+
+    def get_queryset(self):
+        # 404 на несуществующий слаг, иначе <slug:slug>/ отдаст пустую «категорию» с кодом 200
+        self.category = get_object_or_404(Category, slug=self.kwargs['slug'])
+        return self.category.products.filter(is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        return context

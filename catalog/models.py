@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Category(models.Model):
@@ -33,6 +34,7 @@ class Product(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Добавлен')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлён')
+    views_count = models.PositiveIntegerField(default=0, verbose_name='Просмотры')
 
     NEW = 'new'
     USED = 'used'
@@ -50,6 +52,9 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.category})'
+
+    def get_absolute_url(self):
+        return reverse('catalog:product_detail', kwargs={'pk': self.pk})
 
     class Meta:
         verbose_name = 'товар'
