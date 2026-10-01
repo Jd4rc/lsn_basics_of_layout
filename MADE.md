@@ -13,6 +13,18 @@
 
 ---
 
+## 2026-10-01 · Стили форм в миксине · `refactor: extract form styling mixin`
+
+- `StyleFormMixin` в `catalog/forms.py`: в `__init__` проходит по `self.fields` и дописывает
+  `class` по типу виджета (`form-check-input` / `form-select input-ink` / `form-control input-ink`).
+  `ProductForm` и `FeedbackForm` наследуют его левее `ModelForm`; в `Meta.widgets` остались только
+  `rows`, `step` и `type="tel"`.
+
+**Знать:** класс дописывается к уже стоящему, а не затирает его (`attrs.update({'class': ...})`
+затёр бы). Миксин левее `ModelForm`: справа его `__init__` не вызовется. Поля копируются на каждую
+форму (`deepcopy(base_fields)`), поэтому классы не копятся между запросами. Проверено: HTML обеих форм
+(пустые, с ошибками, с товаром) до и после совпал с точностью до порядка атрибутов.
+
 ## 2026-10-01 · Обратная связь сохраняется · `feat: add Feedback model` `feat: save contact form messages as Feedback`
 
 - `Feedback` (`name`, `phone`, `email`, `message`, `created_at`), миграция `0006_feedback`, в админке

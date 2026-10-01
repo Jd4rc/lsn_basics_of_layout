@@ -3,7 +3,27 @@ from django import forms
 from catalog.models import Feedback, Product
 
 
-class ProductForm(forms.ModelForm):
+class StyleFormMixin:
+    """Bootstrap-классы полям формы по типу виджета. Ставится левее ModelForm."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            widget = field.widget
+
+            if isinstance(widget, forms.CheckboxInput):
+                css_class = 'form-check-input'
+            elif isinstance(widget, forms.Select):
+                css_class = 'form-select input-ink'
+            else:
+                css_class = 'form-control input-ink'
+
+            # Дописываем, а не затираем: класс мог прийти из Meta.widgets
+            widget.attrs['class'] = f"{widget.attrs.get('class', '')} {css_class}".strip()
+
+
+class ProductForm(StyleFormMixin, forms.ModelForm):
     """Форма добавления товара."""
 
     class Meta:
@@ -19,18 +39,8 @@ class ProductForm(forms.ModelForm):
             'is_active',
         )
         widgets = {
-            'category': forms.Select(attrs={'class': 'form-select input-ink'}),
-            'name': forms.TextInput(attrs={'class': 'form-control input-ink'}),
-            'description': forms.Textarea(
-                attrs={'class': 'form-control input-ink', 'rows': 4}
-            ),
-            'price': forms.NumberInput(
-                attrs={'class': 'form-control input-ink', 'step': '0.01'}
-            ),
-            'stock': forms.NumberInput(attrs={'class': 'form-control input-ink'}),
-            'condition': forms.Select(attrs={'class': 'form-select input-ink'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control input-ink'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'rows': 4}),
+            'price': forms.NumberInput(attrs={'step': '0.01'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -64,17 +74,15 @@ class ProductForm(forms.ModelForm):
         return price
 
 
-class FeedbackForm(forms.ModelForm):
+class FeedbackForm(StyleFormMixin, forms.ModelForm):
     """Форма обратной связи на странице контактов."""
 
     class Meta:
         model = Feedback
         fields = ('name', 'phone', 'email', 'message')
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control input-ink'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control input-ink', 'type': 'tel'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control input-ink'}),
-            'message': forms.Textarea(attrs={'class': 'form-control input-ink', 'rows': 4}),
+            'phone': forms.TextInput(attrs={'type': 'tel'}),
+            'message': forms.Textarea(attrs={'rows': 4}),
         }
         # LANGUAGE_CODE = 'en-us': стандартные тексты ошибок были бы английскими
         error_messages = {

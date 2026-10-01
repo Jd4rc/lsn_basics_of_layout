@@ -61,8 +61,9 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
   контекст теряется.
 - `ProductCreateView` и `ProductUpdateView` используют один шаблон `product_form.html`
   (дефолтное имя у обоих), который различает режимы по `form.instance.pk`.
-  Валидация `ProductForm` — в методах `clean_<поле>`, CSS-классы полей задаются
-  в `Meta.widgets`.
+  Валидация `ProductForm` — в методах `clean_<поле>`, CSS-классы полей раздаёт
+  `StyleFormMixin` по типу виджета (ставится левее `ModelForm`), в `Meta.widgets` — только
+  не-стилевые атрибуты (`rows`, `step`, `type`).
 - **Порядок в `catalog/urls.py` важен:** `<slug:slug>/` (страница категории)
   подходит под любой одиночный сегмент пути, поэтому стоит последним. Новые маршруты
   добавлять выше него.

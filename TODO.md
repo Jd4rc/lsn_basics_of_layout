@@ -67,11 +67,11 @@
       даты в шаблонах (`|date:`), формат чисел, админка.
       → `fix: switch LANGUAGE_CODE to ru`
 
-- [ ] **Повторы в формах и шаблонах.** `'form-control input-ink'` пять раз в `ProductForm.Meta.widgets`
-      и четыре раза в `FeedbackForm`; цикл по полям одинаков в `product_form.html` и `contacts.html`.
-      Если добавится третья форма (например, `Category`) — вынести классы в `StyleFormMixin`
-      с циклом по `self.fields` в `__init__`, цикл полей — в `includes/form_fields.html`.
-      → `refactor: extract form styling mixin`
+- [ ] **Цикл по полям продублирован в двух шаблонах.** `product_form.html` и `contacts.html` выводят
+      поля одним и тем же блоком (`label`, поле, `help_text`, `field.errors`). Вынести в
+      `includes/form_fields.html`. Заодно `contacts.html` получит вывод `form.non_field_errors`,
+      которого там нет: ошибка из будущего `clean()` на странице контактов пропадёт молча.
+      → `refactor: extract form fields include`
 
 ---
 
