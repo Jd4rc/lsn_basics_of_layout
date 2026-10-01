@@ -74,3 +74,19 @@ class ContactInfo(models.Model):
     class Meta:
         verbose_name = 'контактная информация'
         verbose_name_plural = 'контактная информация'
+
+
+class Feedback(models.Model):
+    name = models.CharField(max_length=100, verbose_name='Имя')
+    phone = models.CharField(max_length=20, verbose_name='Телефон')
+    email = models.EmailField(verbose_name='Email')
+    message = models.TextField(verbose_name='Сообщение')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Получено')
+
+    def __str__(self):
+        return f'{self.name} ({self.created_at:%d.%m.%Y %H:%M})'
+
+    class Meta:
+        verbose_name = 'обращение'
+        verbose_name_plural = 'обращения'
+        ordering = ['-created_at']
