@@ -21,7 +21,7 @@ poetry run python manage.py makemigrations catalog
 poetry run python manage.py runserver
 
 poetry run python manage.py load_fixture_catalog   # loaddata catalog_fixture.json
-poetry run python manage.py delete_data_in_db      # удаляет Product и Category, ContactInfo не трогает
+poetry run python manage.py delete_data_in_db      # удаляет Product и Category, ContactInfo и Feedback не трогает
 
 # пересохранить фикстуру: только через -o, `>` в PowerShell ломает кодировку UTF-8
 poetry run python manage.py dumpdata catalog --indent 2 -o catalog_fixture.json
@@ -44,7 +44,7 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 
 - `config/` — настройки проекта, `catalog/` — единственное приложение, в нём вся логика.
 - Все вьюхи — generic CBV: `ProductListView`, `ProductDetailView`, `ProductCreateView`,
-  `ProductUpdateView`, `ProductDeleteView`, `CategoryProductListView`, `ContactFormView`.
+  `ProductUpdateView`, `ProductDeleteView`, `CategoryProductListView`, `FeedbackCreateView`.
   Новые пишем так же. Имена — `<Модель><Действие>View` (у формы без модели — по форме),
   шаблоны — по дефолтным именам Django (`<model>_detail.html`, `_form.html`,
   `_confirm_delete.html`), `template_name` задаём, только если имя другое.
@@ -56,7 +56,7 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
   `form_class` и `fields` вместе — `ImproperlyConfigured`.
 - Списки с пагинацией — через `NearestPageMixin`: кривой `?page=` даёт ближайшую
   страницу, а не 404.
-- После успешного POST — редирект (Post/Redirect/Get). `ContactFormView` сообщает
+- После успешного POST — редирект (Post/Redirect/Get). `FeedbackCreateView` сообщает
   об отправке через `SuccessMessageMixin` (`django.contrib.messages`): после редиректа
   контекст теряется.
 - `ProductCreateView` и `ProductUpdateView` используют один шаблон `product_form.html`

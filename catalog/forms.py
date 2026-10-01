@@ -1,6 +1,6 @@
 from django import forms
 
-from catalog.models import Product
+from catalog.models import Feedback, Product
 
 
 class ProductForm(forms.ModelForm):
@@ -64,29 +64,31 @@ class ProductForm(forms.ModelForm):
         return price
 
 
-class ContactForm(forms.Form):
+class FeedbackForm(forms.ModelForm):
     """Форма обратной связи на странице контактов."""
 
-    name = forms.CharField(
-        label='Имя',
-        max_length=100,
-        error_messages={
-            'required': 'Укажите имя.',
-            'max_length': 'Имя должно быть не длиннее %(limit_value)d символов.',
-        },
-        widget=forms.TextInput(attrs={'class': 'form-control input-ink'}),
-    )
-    phone = forms.CharField(
-        label='Телефон',
-        max_length=20,
-        error_messages={
-            'required': 'Укажите телефон.',
-            'max_length': 'Телефон должен быть не длиннее %(limit_value)d символов.',
-        },
-        widget=forms.TextInput(attrs={'class': 'form-control input-ink', 'type': 'tel'}),
-    )
-    message = forms.CharField(
-        label='Сообщение',
-        error_messages={'required': 'Напишите сообщение.'},
-        widget=forms.Textarea(attrs={'class': 'form-control input-ink', 'rows': 4}),
-    )
+    class Meta:
+        model = Feedback
+        fields = ('name', 'phone', 'email', 'message')
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control input-ink'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control input-ink', 'type': 'tel'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control input-ink'}),
+            'message': forms.Textarea(attrs={'class': 'form-control input-ink', 'rows': 4}),
+        }
+        # LANGUAGE_CODE = 'en-us': стандартные тексты ошибок были бы английскими
+        error_messages = {
+            'name': {
+                'required': 'Укажите имя.',
+                'max_length': 'Имя должно быть не длиннее %(limit_value)d символов.',
+            },
+            'phone': {
+                'required': 'Укажите телефон.',
+                'max_length': 'Телефон должен быть не длиннее %(limit_value)d символов.',
+            },
+            'email': {
+                'required': 'Укажите email.',
+                'invalid': 'Введите корректный email.',
+            },
+            'message': {'required': 'Напишите сообщение.'},
+        }

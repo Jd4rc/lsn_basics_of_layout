@@ -16,6 +16,7 @@
 | **Product** | ✅ | ✅ | ✅ | ✅ |
 | **Category** | 🔒 | ✅ | 🔒 | 🔒 |
 | **ContactInfo** | 🔒 | ✅ | 🔒 | 🔒 |
+| **Feedback** | ✅ | 🔒 | 🔒 | 🔒 |
 
 ---
 
@@ -46,11 +47,6 @@
 
 Разные причины изменения — разные коммиты.
 
-- [ ] **`print` в `ContactFormView.form_valid()`.** `views.py:29` — отладочный остаток, ему место в `logging`.
-      PRG, `ContactForm` и перевод на `FormView` уже сделаны, остался только он.
-      Логгер — как в `catalog/emails.py`: `logging.getLogger(__name__)`.
-      → `refactor: log contact messages instead of print`
-
 - [ ] **`<slug:slug>/` в `urls.py` — мина.** Матчит любой односегментный путь.
       Работает только потому, что стоит последним. Заведёшь категорию со слагом
       `contacts` или `admin` — она станет недостижимой молча (`products` не задет:
@@ -66,21 +62,16 @@
       → `refactor: use Product.get_absolute_url`
 
 - [ ] **`LANGUAGE_CODE = 'en-us'`.** `settings.py:109`. Стандартные ошибки полей `ProductForm`
-      (`price`, `stock`, `category`, `image`) выходят по-английски. В `ContactForm` это обошли
-      через `error_messages`, в `ProductForm` нет. Чинится одной строкой `'ru'`, но проверить:
+      (`price`, `stock`, `category`, `image`) выходят по-английски. В `FeedbackForm` это обошли
+      через `Meta.error_messages`, в `ProductForm` нет. Чинится одной строкой `'ru'`, но проверить:
       даты в шаблонах (`|date:`), формат чисел, админка.
       → `fix: switch LANGUAGE_CODE to ru`
 
 - [ ] **Повторы в формах и шаблонах.** `'form-control input-ink'` пять раз в `ProductForm.Meta.widgets`
-      и три раза в `ContactForm`; цикл по полям одинаков в `product_form.html` и `contacts.html`.
-      Если добавится третья форма (`Feedback`, `Category`) — вынести классы в `StyleFormMixin`
+      и четыре раза в `FeedbackForm`; цикл по полям одинаков в `product_form.html` и `contacts.html`.
+      Если добавится третья форма (например, `Category`) — вынести классы в `StyleFormMixin`
       с циклом по `self.fields` в `__init__`, цикл полей — в `includes/form_fields.html`.
       → `refactor: extract form styling mixin`
-
-- [ ] **Форма обратной связи ничего не сохраняет** — печатает в консоль.
-      Решить: делать модель `Feedback` (тогда это настоящий Create) или так и оставить.
-      Если модель — `ContactForm` превращается в `ModelForm` с `Meta.fields`,
-      а `ContactFormView` — в `CreateView` (`SuccessMessageMixin` остаётся).
 
 ---
 

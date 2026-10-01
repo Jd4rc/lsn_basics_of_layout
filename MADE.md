@@ -13,6 +13,18 @@
 
 ---
 
+## 2026-10-01 · Обратная связь сохраняется · `feat: add Feedback model` `feat: save contact form messages as Feedback`
+
+- `Feedback` (`name`, `phone`, `email`, `message`, `created_at`), миграция `0006_feedback`, в админке
+  с поиском. `ContactForm(forms.Form)` → `FeedbackForm(ModelForm)`, `ContactFormView(FormView)` →
+  `FeedbackCreateView(SuccessMessageMixin, CreateView)`. `print` из `form_valid()` убран — вьюха без своей логики.
+
+**Знать:** тексты ошибок теперь в `Meta.error_messages` (словарь по полям), а не в полях формы.
+`template_name` задан явно: дефолтный был бы `feedback_form.html`, а страница — `contacts.html`.
+`SuccessMessageMixin` с `CreateView` работает так же, как с `FormView`. Email обязательный.
+Маршрут и его имя `catalog:contacts` прежние. Проверено тест-клиентом в транзакции с откатом:
+пустой POST (4 ошибки), плохой email, успех → 302, сообщение показывается один раз, `max_length`.
+
 ## 2026-09-27 · Письмо на 100 просмотров · `feat: email owner when product hits 100 views`
 
 - `catalog/emails.py` — `send_views_milestone_email()`: тема, текст со ссылкой, получатель `OWNER_EMAIL`;

@@ -3,18 +3,19 @@ from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from catalog.emails import send_views_milestone_email
-from catalog.forms import ContactForm, ProductForm
-from catalog.models import Category, ContactInfo, Product
+from catalog.forms import FeedbackForm, ProductForm
+from catalog.models import Category, ContactInfo, Feedback, Product
 
 PRODUCTS_PER_PAGE = 6
 VIEWS_MILESTONE = 100
 
 
-class ContactFormView(SuccessMessageMixin, FormView):
-    form_class = ContactForm
+class FeedbackCreateView(SuccessMessageMixin, CreateView):
+    model = Feedback
+    form_class = FeedbackForm
     template_name = 'catalog/contacts.html'
     success_url = reverse_lazy('catalog:contacts')
     success_message = 'Спасибо! Мы свяжемся с тобой в ближайшее время.'
@@ -23,11 +24,6 @@ class ContactFormView(SuccessMessageMixin, FormView):
         context = super().get_context_data(**kwargs)
         context['contact_info'] = ContactInfo.objects.first()
         return context
-
-    def form_valid(self, form):
-        data = form.cleaned_data
-        print(f"Сообщение от {data['name']} ({data['phone']}): {data['message']}")
-        return super().form_valid(form)
 
 
 class NearestPageMixin:
