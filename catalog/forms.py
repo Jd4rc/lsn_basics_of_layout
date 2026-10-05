@@ -13,7 +13,7 @@ class StyleFormMixin:
             widget = field.widget
 
             if isinstance(widget, forms.CheckboxInput):
-                css_class = 'form-check-input'
+                css_class = 'form-check-input check-ink'
             elif isinstance(widget, forms.Select):
                 css_class = 'form-select input-ink'
             else:
