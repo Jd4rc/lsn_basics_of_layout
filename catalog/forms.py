@@ -68,8 +68,16 @@ class ProductForm(StyleFormMixin, forms.ModelForm):
     def clean_price(self):
         price = self.cleaned_data['price']
 
-        if price <= 0:
-            raise forms.ValidationError('Цена должна быть больше нуля.')
+        if price < 0:
+            raise forms.ValidationError(
+                f'Цена не может быть отрицательной, а введено {price} ₽. '
+                'Укажите цену больше нуля, например 1490.'
+            )
+        if price == 0:
+            raise forms.ValidationError(
+                'Цена не может быть нулевой: товар не продаётся бесплатно. '
+                'Укажите цену больше нуля, например 1490.'
+            )
 
         return price
 
