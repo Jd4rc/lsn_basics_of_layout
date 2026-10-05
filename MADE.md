@@ -13,6 +13,21 @@
 
 ---
 
+## 2026-10-05 · Критерии hw_26 · `feat: forbid spam words in product name and description` `fix: explain rejected product price` `style: render product checkbox as form-check` `feat: validate product image format and size` `chore: replace load-dotenv with python-dotenv` `chore: ignore OS junk files`
+
+- `FORBIDDEN_WORDS` в `catalog/forms.py`, `clean_name` / `clean_description` проверяют через
+  `casefold()` и `ё`→`е`. Отрицательная и нулевая цена получили разные сообщения с введённым значением.
+- `clean_image`: только JPEG/PNG и не больше 5 МБ. Формат берётся из `image.image.format`: его уже
+  определил Pillow внутри `forms.ImageField`, так что GIF, переименованный в `.png`, не пройдёт.
+- Чекбокс: `form-check` в `product_form.html` + класс `check-ink` в `style.css`.
+- `load-dotenv` был обёрткой, а код импортирует `python-dotenv`, который приезжал транзитивно.
+  `.DS_Store`, `Thumbs.db`, `desktop.ini` в `.gitignore`.
+
+**Знать:** при редактировании без нового файла в `cleaned_data['image']` лежит старый `FieldFile`
+(у него нет `.image`), а при «очистить» там `False`. Поэтому проверяется только `UploadedFile`.
+Проверка по подстроке: `обмана` ловится, `полиции` — нет. `poetry add` падал с «нет сети»,
+а внутри `-v` был `Permission denied` на файл кэша. Помог `--no-cache`.
+
 ## 2026-10-01 · Стили форм в миксине · `refactor: extract form styling mixin`
 
 - `StyleFormMixin` в `catalog/forms.py`: в `__init__` проходит по `self.fields` и дописывает

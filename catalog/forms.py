@@ -3,6 +3,25 @@ from django.core.files.uploadedfile import UploadedFile
 
 from catalog.models import Feedback, Product
 
+# Слова, которые нельзя использовать в названии и описании товара
+FORBIDDEN_WORDS = (
+    'казино',
+    'криптовалюта',
+    'крипта',
+    'биржа',
+    'дешево',
+    'бесплатно',
+    'обман',
+    'полиция',
+    'радар',
+)
+
+
+def find_forbidden_words(text):
+    """Запрещённые слова, найденные в тексте. Регистр и «ё»/«е» не различаются."""
+    normalized = text.casefold().replace('ё', 'е')
+    return [word for word in FORBIDDEN_WORDS if word in normalized]
+
 
 class StyleFormMixin:
     """Bootstrap-классы полям формы по типу виджета. Ставится левее ModelForm."""
@@ -86,6 +105,7 @@ class ProductForm(StyleFormMixin, forms.ModelForm):
         if len(name) < 3:
             raise forms.ValidationError('Название должно быть не короче трёх символов.')
 
+        self.check_forbidden_words(name, 'Название')
         return name
 
     def clean_description(self):
@@ -96,6 +116,7 @@ class ProductForm(StyleFormMixin, forms.ModelForm):
                 'Описание должно быть не короче двадцати символов.'
             )
 
+        self.check_forbidden_words(description, 'Описание')
         return description
 
     def clean_price(self):
@@ -113,6 +134,17 @@ class ProductForm(StyleFormMixin, forms.ModelForm):
             )
 
         return price
+
+    @staticmethod
+    def check_forbidden_words(text, field_label):
+        found = find_forbidden_words(text)
+
+        if found:
+            words = ', '.join(f'«{word}»' for word in found)
+            raise forms.ValidationError(
+                f'{field_label} содержит запрещённые слова: {words}. '
+                'Уберите их и сохраните снова.'
+            )
 
 
 class FeedbackForm(StyleFormMixin, forms.ModelForm):
