@@ -259,6 +259,28 @@ h1 {
     outline-offset: 2px;
 }
 
+/* чекбокс в тон полям: квадрат с чернильной рамкой */
+.check-ink {
+    width: 1.25em;
+    height: 1.25em;
+    margin-top: .1em;
+    background-color: var(--cream);
+    border: 2px solid var(--ink);
+    border-radius: 0;
+}
+
+.check-ink:checked {
+    background-color: var(--ink);
+    border-color: var(--ink);
+}
+
+.check-ink:focus {
+    border-color: var(--ink);
+    box-shadow: none;
+    outline: 2px solid var(--pink-deep);
+    outline-offset: 2px;
+}
+
 .notice {
     border: 2px solid var(--ink);
     background-color: var(--cream);

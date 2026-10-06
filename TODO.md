@@ -16,6 +16,7 @@
 | **Product** | ✅ | ✅ | ✅ | ✅ |
 | **Category** | 🔒 | ✅ | 🔒 | 🔒 |
 | **ContactInfo** | 🔒 | ✅ | 🔒 | 🔒 |
+| **Feedback** | ✅ | 🔒 | 🔒 | 🔒 |
 
 ---
 
@@ -46,11 +47,6 @@
 
 Разные причины изменения — разные коммиты.
 
-- [ ] **`print` в `ContactFormView.form_valid()`.** `views.py:29` — отладочный остаток, ему место в `logging`.
-      PRG, `ContactForm` и перевод на `FormView` уже сделаны, остался только он.
-      Логгер — как в `catalog/emails.py`: `logging.getLogger(__name__)`.
-      → `refactor: log contact messages instead of print`
-
 - [ ] **`<slug:slug>/` в `urls.py` — мина.** Матчит любой односегментный путь.
       Работает только потому, что стоит последним. Заведёшь категорию со слагом
       `contacts` или `admin` — она станет недостижимой молча (`products` не задет:
@@ -65,10 +61,17 @@
       Сменится адресация товара (например, `pk` → `slug`) — править одно место, а не четыре.
       → `refactor: use Product.get_absolute_url`
 
-- [ ] **Форма обратной связи ничего не сохраняет** — печатает в консоль.
-      Решить: делать модель `Feedback` (тогда это настоящий Create) или так и оставить.
-      Если модель — `ContactForm` превращается в `ModelForm` с `Meta.fields`,
-      а `ContactFormView` — в `CreateView` (`SuccessMessageMixin` остаётся).
+- [ ] **`LANGUAGE_CODE = 'en-us'`.** `settings.py:109`. Стандартные ошибки полей `ProductForm`
+      (`price`, `stock`, `category`, `image`) выходят по-английски. В `FeedbackForm` это обошли
+      через `Meta.error_messages`, в `ProductForm` нет. Чинится одной строкой `'ru'`, но проверить:
+      даты в шаблонах (`|date:`), формат чисел, админка.
+      → `fix: switch LANGUAGE_CODE to ru`
+
+- [ ] **Цикл по полям продублирован в двух шаблонах.** `product_form.html` и `contacts.html` выводят
+      поля одним и тем же блоком (`label`, поле, `help_text`, `field.errors`). Вынести в
+      `includes/form_fields.html`. Заодно `contacts.html` получит вывод `form.non_field_errors`,
+      которого там нет: ошибка из будущего `clean()` на странице контактов пропадёт молча.
+      → `refactor: extract form fields include`
 
 ---
 

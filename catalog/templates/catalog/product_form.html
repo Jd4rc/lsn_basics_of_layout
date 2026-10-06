@@ -18,9 +18,14 @@
     {% endif %}
 
     {% for field in form %}
-    <div class="mb-3">
+    <div class="mb-3{% if field.widget_type == 'checkbox' %} form-check{% endif %}">
+        {% if field.widget_type == 'checkbox' %}
+        {{ field }}
+        <label for="{{ field.id_for_label }}" class="form-check-label form-label-ink">{{ field.label }}</label>
+        {% else %}
         <label for="{{ field.id_for_label }}" class="form-label-ink">{{ field.label }}</label>
         {{ field }}
+        {% endif %}
         {% if field.help_text %}
         <div class="form-text">{{ field.help_text }}</div>
         {% endif %}

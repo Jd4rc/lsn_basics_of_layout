@@ -1,9 +1,54 @@
 from django import forms
+from django.core.files.uploadedfile import UploadedFile
 
-from catalog.models import Product
+from catalog.models import Feedback, Product
+
+# Слова, которые нельзя использовать в названии и описании товара
+FORBIDDEN_WORDS = (
+    'казино',
+    'криптовалюта',
+    'крипта',
+    'биржа',
+    'дешево',
+    'бесплатно',
+    'обман',
+    'полиция',
+    'радар',
+)
 
 
-class ProductForm(forms.ModelForm):
+def find_forbidden_words(text):
+    """Запрещённые слова, найденные в тексте. Регистр и «ё»/«е» не различаются."""
+    normalized = text.casefold().replace('ё', 'е')
+    return [word for word in FORBIDDEN_WORDS if word in normalized]
+
+
+class StyleFormMixin:
+    """Bootstrap-классы полям формы по типу виджета. Ставится левее ModelForm."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            widget = field.widget
+
+            if isinstance(widget, forms.CheckboxInput):
+                css_class = 'form-check-input check-ink'
+            elif isinstance(widget, forms.Select):
+                css_class = 'form-select input-ink'
+            else:
+                css_class = 'form-control input-ink'
+
+            # Дописываем, а не затираем: класс мог прийти из Meta.widgets
+            widget.attrs['class'] = f"{widget.attrs.get('class', '')} {css_class}".strip()
+
+
+# Фото товара: форматы по содержимому файла (Pillow), а не по расширению
+ALLOWED_IMAGE_FORMATS = ('JPEG', 'PNG')
+MAX_IMAGE_SIZE_MB = 5
+
+
+class ProductForm(StyleFormMixin, forms.ModelForm):
     """Форма добавления товара."""
 
     class Meta:
@@ -19,23 +64,40 @@ class ProductForm(forms.ModelForm):
             'is_active',
         )
         widgets = {
-            'category': forms.Select(attrs={'class': 'form-select input-ink'}),
-            'name': forms.TextInput(attrs={'class': 'form-control input-ink'}),
-            'description': forms.Textarea(
-                attrs={'class': 'form-control input-ink', 'rows': 4}
-            ),
-            'price': forms.NumberInput(
-                attrs={'class': 'form-control input-ink', 'step': '0.01'}
-            ),
-            'stock': forms.NumberInput(attrs={'class': 'form-control input-ink'}),
-            'condition': forms.Select(attrs={'class': 'form-select input-ink'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control input-ink'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'description': forms.Textarea(attrs={'rows': 4}),
+            'price': forms.NumberInput(attrs={'step': '0.01'}),
+            'image': forms.ClearableFileInput(attrs={'accept': 'image/jpeg,image/png'}),
+        }
+        error_messages = {
+            'image': {
+                'invalid_image': 'Это не картинка или файл повреждён. Загрузите JPEG или PNG.',
+            },
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['description'].required = True
+
+    def clean_image(self):
+        image = self.cleaned_data.get('image')
+
+        # Новый файл не выбран: пусто, «очистить» или старое фото при редактировании
+        if not isinstance(image, UploadedFile):
+            return image
+
+        if image.size > MAX_IMAGE_SIZE_MB * 1024 * 1024:
+            raise forms.ValidationError(
+                f'Фото весит {image.size / 1024 / 1024:.1f} МБ, а можно не больше '
+                f'{MAX_IMAGE_SIZE_MB} МБ. Уменьшите или сожмите его.'
+            )
+
+        # Картинку уже открыл Pillow в forms.ImageField, формат — в image.image
+        if image.image.format not in ALLOWED_IMAGE_FORMATS:
+            raise forms.ValidationError(
+                f'Фото в формате {image.image.format}, а принимаются только JPEG и PNG.'
+            )
+
+        return image
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
@@ -43,6 +105,7 @@ class ProductForm(forms.ModelForm):
         if len(name) < 3:
             raise forms.ValidationError('Название должно быть не короче трёх символов.')
 
+        self.check_forbidden_words(name, 'Название')
         return name
 
     def clean_description(self):
@@ -53,40 +116,60 @@ class ProductForm(forms.ModelForm):
                 'Описание должно быть не короче двадцати символов.'
             )
 
+        self.check_forbidden_words(description, 'Описание')
         return description
 
     def clean_price(self):
         price = self.cleaned_data['price']
 
-        if price <= 0:
-            raise forms.ValidationError('Цена должна быть больше нуля.')
+        if price < 0:
+            raise forms.ValidationError(
+                f'Цена не может быть отрицательной, а введено {price} ₽. '
+                'Укажите цену больше нуля, например 1490.'
+            )
+        if price == 0:
+            raise forms.ValidationError(
+                'Цена не может быть нулевой: товар не продаётся бесплатно. '
+                'Укажите цену больше нуля, например 1490.'
+            )
 
         return price
 
+    @staticmethod
+    def check_forbidden_words(text, field_label):
+        found = find_forbidden_words(text)
 
-class ContactForm(forms.Form):
+        if found:
+            words = ', '.join(f'«{word}»' for word in found)
+            raise forms.ValidationError(
+                f'{field_label} содержит запрещённые слова: {words}. '
+                'Уберите их и сохраните снова.'
+            )
+
+
+class FeedbackForm(StyleFormMixin, forms.ModelForm):
     """Форма обратной связи на странице контактов."""
 
-    name = forms.CharField(
-        label='Имя',
-        max_length=100,
-        error_messages={
-            'required': 'Укажите имя.',
-            'max_length': 'Имя должно быть не длиннее %(limit_value)d символов.',
-        },
-        widget=forms.TextInput(attrs={'class': 'form-control input-ink'}),
-    )
-    phone = forms.CharField(
-        label='Телефон',
-        max_length=20,
-        error_messages={
-            'required': 'Укажите телефон.',
-            'max_length': 'Телефон должен быть не длиннее %(limit_value)d символов.',
-        },
-        widget=forms.TextInput(attrs={'class': 'form-control input-ink', 'type': 'tel'}),
-    )
-    message = forms.CharField(
-        label='Сообщение',
-        error_messages={'required': 'Напишите сообщение.'},
-        widget=forms.Textarea(attrs={'class': 'form-control input-ink', 'rows': 4}),
-    )
+    class Meta:
+        model = Feedback
+        fields = ('name', 'phone', 'email', 'message')
+        widgets = {
+            'phone': forms.TextInput(attrs={'type': 'tel'}),
+            'message': forms.Textarea(attrs={'rows': 4}),
+        }
+        # LANGUAGE_CODE = 'en-us': стандартные тексты ошибок были бы английскими
+        error_messages = {
+            'name': {
+                'required': 'Укажите имя.',
+                'max_length': 'Имя должно быть не длиннее %(limit_value)d символов.',
+            },
+            'phone': {
+                'required': 'Укажите телефон.',
+                'max_length': 'Телефон должен быть не длиннее %(limit_value)d символов.',
+            },
+            'email': {
+                'required': 'Укажите email.',
+                'invalid': 'Введите корректный email.',
+            },
+            'message': {'required': 'Напишите сообщение.'},
+        }
