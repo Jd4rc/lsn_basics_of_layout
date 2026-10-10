@@ -43,9 +43,30 @@ class StyleFormMixin:
             widget.attrs['class'] = f"{widget.attrs.get('class', '')} {css_class}".strip()
 
 
-# Фото товара: форматы по содержимому файла (Pillow), а не по расширению
+# Фото товара и аватар: форматы по содержимому файла (Pillow), а не по расширению
 ALLOWED_IMAGE_FORMATS = ('JPEG', 'PNG')
 MAX_IMAGE_SIZE_MB = 5
+
+
+def check_image(image):
+    """Только JPEG и PNG не больше MAX_IMAGE_SIZE_MB. Значение для clean_<поле>."""
+    # Новый файл не выбран: пусто, «очистить» или старое фото при редактировании
+    if not isinstance(image, UploadedFile):
+        return image
+
+    if image.size > MAX_IMAGE_SIZE_MB * 1024 * 1024:
+        raise forms.ValidationError(
+            f'Фото весит {image.size / 1024 / 1024:.1f} МБ, а можно не больше '
+            f'{MAX_IMAGE_SIZE_MB} МБ. Уменьшите или сожмите его.'
+        )
+
+    # Картинку уже открыл Pillow в forms.ImageField, формат — в image.image
+    if image.image.format not in ALLOWED_IMAGE_FORMATS:
+        raise forms.ValidationError(
+            f'Фото в формате {image.image.format}, а принимаются только JPEG и PNG.'
+        )
+
+    return image
 
 
 class ProductForm(StyleFormMixin, forms.ModelForm):
@@ -79,25 +100,7 @@ class ProductForm(StyleFormMixin, forms.ModelForm):
         self.fields['description'].required = True
 
     def clean_image(self):
-        image = self.cleaned_data.get('image')
-
-        # Новый файл не выбран: пусто, «очистить» или старое фото при редактировании
-        if not isinstance(image, UploadedFile):
-            return image
-
-        if image.size > MAX_IMAGE_SIZE_MB * 1024 * 1024:
-            raise forms.ValidationError(
-                f'Фото весит {image.size / 1024 / 1024:.1f} МБ, а можно не больше '
-                f'{MAX_IMAGE_SIZE_MB} МБ. Уменьшите или сожмите его.'
-            )
-
-        # Картинку уже открыл Pillow в forms.ImageField, формат — в image.image
-        if image.image.format not in ALLOWED_IMAGE_FORMATS:
-            raise forms.ValidationError(
-                f'Фото в формате {image.image.format}, а принимаются только JPEG и PNG.'
-            )
-
-        return image
+        return check_image(self.cleaned_data.get('image'))
 
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
