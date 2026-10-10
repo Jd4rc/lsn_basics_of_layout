@@ -13,6 +13,18 @@
 
 ---
 
+## 2026-10-10 · hw_27: пользователи и вход · `refactor: extract image check for reuse` `feat: switch built-in messages to Russian` `feat: add users app with email-based custom user model` `feat: add registration, login, logout and profile` `feat: require login for product pages` `docs: update README`
+
+- Приложение `users`: `User(AbstractUser)` без `username`, `USERNAME_FIELD = 'email'`, поля `avatar`,
+  `phone_number`, `country`; `UserManager` (вход по email без учёта регистра), `UserAdmin` под email.
+- Регистрация (`UserCreationForm`, сразу вход и письмо), вход (`LoginView`), выход POST-кнопкой, профиль.
+  `LoginRequiredMixin` на карточке, создании, правке и удалении товара; `LANGUAGE_CODE = 'ru'`.
+
+**Знать:** `AUTH_USER_MODEL` на смигрированной базе — только после `migrate auth zero` (удалил
+пользователей и `django_admin_log`), иначе `InconsistentMigrationHistory`. `UserCreationForm.clean_username`
+жёстко про `username`: дубль email другим регистром ловит свой `clean_email`. Длину поля формы Django
+проверяет до `clean_<поле>`, поэтому у телефона в форме `max_length=30`, а 16 — в модели после очистки.
+
 ## 2026-10-05 · Критерии hw_26 · `feat: forbid spam words in product name and description` `fix: explain rejected product price` `style: render product checkbox as form-check` `feat: validate product image format and size` `chore: replace load-dotenv with python-dotenv` `chore: ignore OS junk files`
 
 - `FORBIDDEN_WORDS` в `catalog/forms.py`, `clean_name` / `clean_description` проверяют через
