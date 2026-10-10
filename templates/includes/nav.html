@@ -16,12 +16,33 @@
                        href="{% url 'catalog:category_detail' category.slug %}">{{ category.name }}</a>
                 </li>
                 {% endfor %}
+                {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'catalog:product_create' %}">Добавить товар</a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'catalog:contacts' %}">Контакты</a>
                 </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:profile' %}">{{ user.first_name|default:user.email }}</a>
+                </li>
+                <li class="nav-item">
+                    {# LogoutView принимает только POST: ссылкой (GET) выйти нельзя #}
+                    <form method="post" action="{% url 'users:logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link nav-link--button">Выйти</button>
+                    </form>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:login' %}">Войти</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:register' %}">Регистрация</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>

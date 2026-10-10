@@ -106,6 +106,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Входа требуют страницы товара (LoginRequiredMixin), туда же шлёт после входа и выхода
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'catalog:home'
+LOGOUT_REDIRECT_URL = 'catalog:home'
+
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 

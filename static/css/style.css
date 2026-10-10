@@ -327,3 +327,17 @@ h1 {
 .pagination .disabled .page-link {
     opacity: .45;
 }
+
+/* аватар в профиле: квадрат в чернильной рамке */
+.avatar-ink {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border: 2px solid var(--ink);
+}
+
+/* «Выйти» — кнопка POST-формы, но выглядит как ссылка меню */
+.site-nav .nav-link--button {
+    background: none;
+    border: 0;
+}

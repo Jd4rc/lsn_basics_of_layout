@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+
+<h1>Вход</h1>
+
+{% if next %}
+<div class="notice mb-4">
+    <p class="mb-0">Войдите, чтобы открыть эту страницу.</p>
+</div>
+{% endif %}
+
+<form method="post" class="feedback" novalidate>
+    {% csrf_token %}
+    {% include 'includes/form_fields.html' %}
+    {# после входа вернуть туда, откуда отправил LoginRequiredMixin #}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit" class="btn btn-ink">Войти</button>
+</form>
+
+<p class="mt-4">Нет аккаунта? <a href="{% url 'users:register' %}">Зарегистрироваться</a></p>
+
+{% endblock %}
