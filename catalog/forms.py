@@ -160,7 +160,7 @@ class FeedbackForm(StyleFormMixin, forms.ModelForm):
             'phone': forms.TextInput(attrs={'type': 'tel'}),
             'message': forms.Textarea(attrs={'rows': 4}),
         }
-        # LANGUAGE_CODE = 'en-us': стандартные тексты ошибок были бы английскими
+        # Свои тексты вместо стандартных «Обязательное поле.»
         error_messages = {
             'name': {
                 'required': 'Укажите имя.',
