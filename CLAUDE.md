@@ -42,9 +42,12 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 
 ## Архитектура
 
-- `config/` — настройки проекта, `catalog/` — единственное приложение, в нём вся логика.
+- `config/` — настройки проекта, `catalog/` — магазин, `users/` — свой пользователь
+  (`AUTH_USER_MODEL = 'users.User'`, вход по email, `username` нет), регистрация, вход, профиль.
+  На пользователя ссылаться через `settings.AUTH_USER_MODEL` / `get_user_model()`, не `auth.User`.
 - Все вьюхи — generic CBV: `ProductListView`, `ProductDetailView`, `ProductCreateView`,
-  `ProductUpdateView`, `ProductDeleteView`, `CategoryProductListView`, `FeedbackCreateView`.
+  `ProductUpdateView`, `ProductDeleteView`, `CategoryProductListView`, `FeedbackCreateView`,
+  в `users` — `UserCreateView`, `UserLoginView`, `UserUpdateView` (выход — стандартный `LogoutView`).
   Новые пишем так же. Имена — `<Модель><Действие>View` (у формы без модели — по форме),
   шаблоны — по дефолтным именам Django (`<model>_detail.html`, `_form.html`,
   `_confirm_delete.html`), `template_name` задаём, только если имя другое.
