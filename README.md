@@ -3,11 +3,13 @@
 Учебный Django-проект: витрина магазина аквариумов, рыбок, растений и сопутствующего
 оборудования. Есть вёрстка на шаблонах Django с наследованием от общего макета и
 подшаблонами, каталог с постраничным выводом, страницы товаров и категорий, полный
-CRUD товаров прямо на сайте (добавление, просмотр, редактирование, удаление) и форма
-обратной связи. Все вьюхи написаны на классах — generic class-based views Django,
+CRUD товаров прямо на сайте (добавление, просмотр, редактирование, удаление), форма
+обратной связи, а также регистрация и вход по email с приветственным письмом и профилем
+пользователя. Открыты всем только списки товаров и контакты, страницы товара — после входа.
+Все вьюхи написаны на классах — generic class-based views Django,
 формы — на `ModelForm` с серверной валидацией. Данные — категории, товары, контактная
-информация магазина и обращения посетителей — хранятся в PostgreSQL, все четыре модели
-также доступны в админке.
+информация магазина, обращения посетителей и пользователи — хранятся в PostgreSQL, все
+модели также доступны в админке.
 
 ## Стек
 
@@ -53,6 +55,12 @@ poetry run python manage.py runserver
 
 Если виртуальное окружение уже активировано, префикс `poetry run` можно опускать.
 
+Для входа в админку создать суперпользователя — Django спросит email и пароль:
+
+```bash
+poetry run python manage.py createsuperuser
+```
+
 Загруженные фото товаров лежат в `media/`, а эта папка исключена из репозитория
 (`.gitignore`). После свежего клонирования у товаров из фикстуры, для которых указано
 фото, картинки не будут найдены — их нужно загрузить заново через админку или форму.
@@ -60,19 +68,25 @@ poetry run python manage.py runserver
 
 ## Страницы
 
-| URL | Метод | Имя маршрута | Вьюха | Шаблон |
-|---|---|---|---|---|
-| `/` | GET | `catalog:home` | `ProductListView` | `catalog/home.html` |
-| `/contacts/` | GET, POST | `catalog:contacts` | `FeedbackCreateView` | `catalog/contacts.html` |
-| `/products/new/` | GET, POST | `catalog:product_create` | `ProductCreateView` | `catalog/product_form.html` |
-| `/products/<int:pk>/` | GET | `catalog:product_detail` | `ProductDetailView` | `catalog/product_detail.html` |
-| `/products/<int:pk>/edit/` | GET, POST | `catalog:product_update` | `ProductUpdateView` | `catalog/product_form.html` |
-| `/products/<int:pk>/delete/` | GET, POST | `catalog:product_delete` | `ProductDeleteView` | `catalog/product_confirm_delete.html` |
-| `/<slug>/` | GET | `catalog:category_detail` | `CategoryProductListView` | `catalog/category_detail.html` |
-| `/admin/` | — | — | — | админка Django |
+| URL | Метод | Имя маршрута | Вьюха | Шаблон | Вход |
+|---|---|---|---|---|---|
+| `/` | GET | `catalog:home` | `ProductListView` | `catalog/home.html` | — |
+| `/contacts/` | GET, POST | `catalog:contacts` | `FeedbackCreateView` | `catalog/contacts.html` | — |
+| `/products/new/` | GET, POST | `catalog:product_create` | `ProductCreateView` | `catalog/product_form.html` | нужен |
+| `/products/<int:pk>/` | GET | `catalog:product_detail` | `ProductDetailView` | `catalog/product_detail.html` | нужен |
+| `/products/<int:pk>/edit/` | GET, POST | `catalog:product_update` | `ProductUpdateView` | `catalog/product_form.html` | нужен |
+| `/products/<int:pk>/delete/` | GET, POST | `catalog:product_delete` | `ProductDeleteView` | `catalog/product_confirm_delete.html` | нужен |
+| `/users/register/` | GET, POST | `users:register` | `UserCreateView` | `users/register.html` | — |
+| `/users/login/` | GET, POST | `users:login` | `UserLoginView` | `users/login.html` | — |
+| `/users/logout/` | POST | `users:logout` | `LogoutView` (Django) | — | — |
+| `/users/profile/` | GET, POST | `users:profile` | `UserUpdateView` | `users/user_form.html` | нужен |
+| `/<slug>/` | GET | `catalog:category_detail` | `CategoryProductListView` | `catalog/category_detail.html` | — |
+| `/admin/` | — | — | — | админка Django | персонал |
 
-Маршруты приложения описаны в `catalog/urls.py` и подключены в `config/urls.py` через
-`include('catalog.urls')`. Все адреса заканчиваются на `/`.
+Маршруты приложений описаны в `catalog/urls.py` и `users/urls.py` и подключены
+в `config/urls.py` через `include()`. Все адреса заканчиваются на `/`. Гостя со страницы,
+где нужен вход, перенаправляет на `/users/login/?next=<адрес>`, после входа он
+возвращается обратно.
 
 Маршрут категории `/<slug>/` стоит в `catalog/urls.py` последним: он подходит под
 любое слово, поэтому все более частные адреса (`contacts/`, `products/...`) должны
@@ -103,6 +117,19 @@ lsn_basics_of_layout/
 │   ├── admin.py
 │   ├── urls.py
 │   └── views.py                     # вьюхи на классах (CBV)
+├── users/                           # пользователи: регистрация, вход, профиль
+│   ├── templates/users/
+│   │   ├── register.html
+│   │   ├── login.html
+│   │   └── user_form.html           # редактирование профиля
+│   ├── migrations/
+│   ├── admin.py                     # UserAdmin под вход по email
+│   ├── emails.py                    # приветственное письмо после регистрации
+│   ├── forms.py                     # UserRegisterForm, UserLoginForm, UserProfileForm
+│   ├── managers.py                  # UserManager: create_user / create_superuser по email
+│   ├── models.py                    # User
+│   ├── urls.py
+│   └── views.py
 ├── config/                          # настройки проекта
 │   ├── settings.py
 │   ├── urls.py
@@ -114,6 +141,7 @@ lsn_basics_of_layout/
 │   └── images/                      # fish.svg, ferb.jpg
 ├── templates/
 │   ├── includes/
+│   │   ├── form_fields.html         # поля формы с ошибками (шаблоны users)
 │   │   ├── nav.html                 # шапка с навигацией
 │   │   └── pagination.html          # постраничная навигация
 │   └── base.html                    # общий макет проекта
@@ -132,8 +160,12 @@ lsn_basics_of_layout/
 Повторяющиеся куски вынесены в подшаблоны и подключаются через `{% include %}`:
 
 - `templates/includes/nav.html` — навигация: название магазина со ссылкой на главную, пункты
-  всех категорий, «Добавить товар» и «Контакты». Подключается в `base.html`, поэтому
+  всех категорий и «Контакты». Гость видит «Войти» и «Регистрация», вошедший — «Добавить
+  товар», ссылку на профиль (имя или email) и «Выйти». Подключается в `base.html`, поэтому
   есть на каждой странице.
+- `templates/includes/form_fields.html` — поля формы с подписями, подсказками и ошибками,
+  включая общие ошибки формы (`non_field_errors`). Ожидает `form`, используется в шаблонах
+  `users`.
 - `templates/includes/pagination.html` — кнопки «Назад», номера страниц, «Вперёд».
   Ожидает в контексте переменную `page_obj`; если страница всего одна, ничего
   не выводит.
@@ -164,6 +196,10 @@ lsn_basics_of_layout/
 | `ProductUpdateView` | `UpdateView` | редактирование товара |
 | `ProductDeleteView` | `DeleteView` | удаление товара с подтверждением |
 | `FeedbackCreateView` | `CreateView` + `SuccessMessageMixin` | форма обратной связи, сохраняет обращение |
+
+Страницу товара, добавление, редактирование и удаление закрывает `LoginRequiredMixin`:
+он стоит левее базового класса, иначе проверка не сработает. Адрес входа задан
+в `LOGIN_URL` в `config/settings.py`. Вьюхи пользователей описаны в разделе «Пользователи».
 
 Шаблоны товара названы по умолчаниям Django (`product_detail.html`, `product_form.html`,
 `product_confirm_delete.html`), поэтому `template_name` задан только у главной,
@@ -247,6 +283,31 @@ lsn_basics_of_layout/
   одновременных открытий. Если почтовый сервер недоступен, страница товара всё равно
   открывается, а ошибка пишется в консоль.
 
+### Пользователи
+
+Вместо стандартного `auth.User` — своя модель `users.User` (`AUTH_USER_MODEL = 'users.User'`),
+унаследованная от `AbstractUser`. Поля `username` нет, входят по email
+(`USERNAME_FIELD = 'email'`). Дополнительные поля: аватар, номер телефона и страна,
+все необязательные. Создаёт пользователей свой `UserManager`, email при входе он сравнивает
+без учёта регистра: `Fish@mail.ru` и `fish@mail.ru` — один пользователь.
+
+- **Регистрация** (`/users/register/`) — `UserRegisterForm` на основе `UserCreationForm`:
+  email, пароль и повтор пароля. Под полями выводятся ошибки: неверный email, такой
+  email уже есть, пароли не совпадают, пароль слишком короткий или простой
+  (`AUTH_PASSWORD_VALIDATORS`). После регистрации пользователь сразу входит и попадает
+  на главную, а на его email уходит приветственное письмо (`users/emails.py`). Если
+  письмо не отправилось, регистрация не ломается, ошибка пишется в лог.
+- **Вход** (`/users/login/`) — `UserLoginView` на основе `LoginView` с формой
+  `UserLoginForm`: email и пароль. При неверной паре — «Неверный email или пароль.».
+  После входа — главная или страница из `?next=`. Вошедшего со страницы входа
+  сразу уводит на главную.
+- **Выход** — стандартный `LogoutView`, только POST: в меню это кнопка формы
+  с CSRF-токеном, а не ссылка. После выхода — главная.
+- **Профиль** (`/users/profile/`) — имя, фамилия, телефон, страна и аватар. Телефон можно
+  ввести с пробелами, скобками и дефисами, сохраняется он цифрами (`+375291234567`).
+  Аватар — JPEG или PNG до 5 МБ, проверка общая с фото товара (`check_image` в
+  `catalog/forms.py`). Открыть можно только свой профиль.
+
 ### Модели
 
 - **`Category`** — категория товаров (`name`, `description`, `slug`), сортировка
@@ -261,6 +322,9 @@ lsn_basics_of_layout/
 - **`Feedback`** — обращение из формы обратной связи: имя, телефон, email, сообщение
   и дата получения. Сортировка — сначала новые. В админке есть поиск по имени,
   телефону и email.
+- **`User`** (приложение `users`) — пользователь: email (уникальный, им входят), пароль,
+  имя, фамилия, аватар (`media/users/avatars/`), номер телефона и страна. Подробнее —
+  раздел «Пользователи».
 
 У всех моделей есть `__str__` и класс `Meta` с `verbose_name` и `verbose_name_plural`.
 Категорию, в которой есть товары, удалить нельзя (`PROTECT`): сначала нужно удалить
@@ -324,13 +388,15 @@ forms.ModelForm)`), его используют обе формы проекта
 
 ### Известные ограничения
 
-- Входа на сайт нет: добавлять, редактировать и удалять товары может любой
-  посетитель. Проект рассчитан на локальный запуск через `runserver`.
+- У товара нет владельца: любой вошедший пользователь может редактировать и удалять
+  любой товар.
+- Восстановления пароля нет: забытый пароль меняется только через админку.
+- Приветственное письмо уходит внутри запроса регистрации: при медленном SMTP
+  страница ждёт до 10 секунд (`timeout` в `MAILERS`).
 - Запрещённые слова ищутся как подстрока: «обмана» будет найдено, а другие формы
   слова — например, «полиции» — нет.
-- `LANGUAGE_CODE = 'en-us'`: стандартные ошибки полей товара (например, «Enter a number.»
-  для цены) выводятся по-английски. Собственные проверки и форма обратной связи — по-русски.
-- При удалении товара файл фото остаётся в `media/products/`.
+- При удалении товара файл фото остаётся в `media/products/`, при замене аватара старый
+  файл остаётся в `media/users/avatars/`.
 - Категория со слагом `contacts` или `admin` будет недоступна: эти адреса раньше
   перехватят страница контактов и админка.
 

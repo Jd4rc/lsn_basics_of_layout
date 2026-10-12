@@ -9,7 +9,8 @@
 ## Где мы сейчас
 
 **CRUD для `Product` закрыт полностью, все вьюхи — на классах (CBV).** Все три модели есть в `catalog/admin.py`,
-так что у персонала CRUD полный и по остальным.
+так что у персонала CRUD полный и по остальным. С hw_27 есть пользователи (`users`): регистрация,
+вход по email, профиль; страницы товара — только после входа.
 
 | Модель | Create | Read | Update | Delete |
 |---|---|---|---|---|
@@ -20,26 +21,18 @@
 
 ---
 
-## 1. Права доступа ← стало блокирующим
+## 1. Права доступа: владелец товара
 
-Раньше это лежало в «отложено». После появления Delete — нет.
+Вход есть (hw_27), страницы товара закрыты `LoginRequiredMixin`. Но **любой вошедший**
+редактирует и удаляет **любой** товар: `LoginRequiredMixin` проверяет только факт входа.
 
-Сейчас **любой анонимный посетитель** может зайти на `/products/5/delete/`
-и стереть товар. Безвозвратно, без логина. Ссылка «Удалить» висит в карточке
-у всех на виду, искать не надо. Раньше он мог максимум насорить через
-«Добавить товар» — теперь может удалять чужое.
-
-- [ ] Закрыть `ProductCreateView`, `ProductUpdateView`, `ProductDeleteView` через
-      `LoginRequiredMixin` — **левее** базового класса (вьюхи уже на CBV, `@login_required` не нужен)
-- [ ] Убрать «Добавить товар» из `nav.html:20` для неавторизованных (`{% if user.is_authenticated %}`)
-- [ ] Спрятать «Редактировать» и «Удалить» в `product_detail.html` тем же условием
-- [ ] Настроить `LOGIN_URL` в `settings.py`, иначе редирект пойдёт на несуществующий `/accounts/login/`
-- [ ] → `feat: restrict product management to logged-in users`
-
-> Пока проект крутится на `runserver` у тебя на машине — не горит.
-> В момент, когда окажется доступен откуда-то ещё, это дыра.
-> Прятать кнопки в шаблоне **недостаточно** — адрес всё равно открывается напрямую.
-> Защита на вьюхе обязательна, шаблон только про удобство.
+- [ ] `Product.owner` — `ForeignKey(settings.AUTH_USER_MODEL, on_delete=SET_NULL, null=True)`,
+      `null=True` нужен для уже существующих товаров
+- [ ] Владелец проставляется в `ProductCreateView.form_valid()` (`form.instance.owner = self.request.user`),
+      в `ProductForm.Meta.fields` поля `owner` нет
+- [ ] `ProductUpdateView` / `ProductDeleteView`: `get_queryset()` с `filter(owner=self.request.user)` —
+      чужой товар даёт 404. Кнопки «Редактировать» / «Удалить» в `product_detail.html` — только владельцу
+- [ ] → `feat: restrict product editing to its owner`
 
 ---
 
@@ -61,21 +54,26 @@
       Сменится адресация товара (например, `pk` → `slug`) — править одно место, а не четыре.
       → `refactor: use Product.get_absolute_url`
 
-- [ ] **`LANGUAGE_CODE = 'en-us'`.** `settings.py:109`. Стандартные ошибки полей `ProductForm`
-      (`price`, `stock`, `category`, `image`) выходят по-английски. В `FeedbackForm` это обошли
-      через `Meta.error_messages`, в `ProductForm` нет. Чинится одной строкой `'ru'`, но проверить:
-      даты в шаблонах (`|date:`), формат чисел, админка.
-      → `fix: switch LANGUAGE_CODE to ru`
+- [ ] **Цикл по полям всё ещё продублирован в двух шаблонах.** `templates/includes/form_fields.html`
+      уже есть (hw_27, им пользуются шаблоны `users`), но `product_form.html` и `contacts.html` выводят
+      поля своим блоком. Перевести `contacts.html` на include: получит `form.non_field_errors`,
+      которого там нет. В `product_form.html` чекбокс выводится через `form-check` — include
+      это пока не умеет, сначала добавить ветку для `field.widget_type == 'checkbox'`.
+      → `refactor: use form fields include in catalog templates`
 
-- [ ] **Цикл по полям продублирован в двух шаблонах.** `product_form.html` и `contacts.html` выводят
-      поля одним и тем же блоком (`label`, поле, `help_text`, `field.errors`). Вынести в
-      `includes/form_fields.html`. Заодно `contacts.html` получит вывод `form.non_field_errors`,
-      которого там нет: ошибка из будущего `clean()` на странице контактов пропадёт молча.
-      → `refactor: extract form fields include`
+- [ ] **Тестов нет.** Поток hw_27 (регистрация, письмо, вход, выход, редирект гостя, профиль)
+      проверялся тестовым клиентом из скрипта. Переписать в `users/tests.py` — `mail.outbox`
+      ловит письмо, `assertRedirects` — `?next=`. Нужно право `CREATEDB` у `DB_USER`.
+      → `test: cover registration, login and product access`
 
 ---
 
 ## 3. Осознанно отложено
+
+- [ ] **Восстановление пароля.** В hw_27 не входило, забытый пароль меняется только в админке.
+      Четыре готовые вьюхи `PasswordReset*View`. Грабли: внутри у них имена маршрутов без
+      namespace (`password_reset_done`, `password_reset_complete`) — под `users:` нужен свой
+      `success_url = reverse_lazy('users:...')` и свой URL в шаблоне письма.
 
 - [ ] **CRUD для Category на сайте.** Сейчас только админка, и этого может быть
       достаточно — категории заводит владелец магазина, не посетитель.
@@ -84,11 +82,13 @@
       с товарами — упадёт `ProtectedError`, его придётся ловить, иначе 500.
 
 - [ ] **Осиротевшие картинки.** `product.delete()` не трогает файлы в `media/products/`.
-      Копятся после каждого удаления. Чинится сигналом `post_delete` или чисткой по расписанию.
+      Копятся после каждого удаления. То же с аватаром: при замене или «очистить» в профиле
+      старый файл остаётся в `media/users/avatars/`. Чинится сигналом `post_delete` или чисткой по расписанию.
       На CBV — ещё вариант: `self.object.image.delete(save=False)` в
       `ProductDeleteView.form_valid()` после `super()` (почему там — `MADE.md`, запись про CBV).
 
-- [ ] **Письмо на 100 просмотров уходит внутри запроса.** Сотый посетитель ждёт SMTP,
+- [ ] **Письма уходят внутри запроса.** Сотый посетитель товара и только что
+      зарегистрированный пользователь (`users/emails.py`) ждут SMTP,
       при недоступном сервере — до `timeout` (10 с) из `MAILERS`. Для учебного проекта
       нормально, на бою — очередь задач (Celery) и отправка в фоне.
 

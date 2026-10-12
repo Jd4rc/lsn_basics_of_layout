@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+
+<h1>Профиль</h1>
+<p class="credits"><span class="credits__label">email</span> {{ user.email }}</p>
+
+{% for message in messages %}
+<div class="notice mb-4">{{ message }}</div>
+{% endfor %}
+
+{% if user.avatar %}
+<img src="{{ user.avatar.url }}" alt="Аватар" class="avatar-ink mb-4">
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="feedback" novalidate>
+    {% csrf_token %}
+    {% include 'includes/form_fields.html' %}
+    <button type="submit" class="btn btn-ink">Сохранить</button>
+    <a href="{% url 'catalog:home' %}" class="btn btn-ink">На главную</a>
+</form>
+
+{% endblock %}
