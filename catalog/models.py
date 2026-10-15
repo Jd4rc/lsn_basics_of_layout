@@ -72,6 +72,9 @@ class Product(models.Model):
         verbose_name = 'товар'
         verbose_name_plural = 'товары'
         ordering = ['-created_at', 'name']
+        permissions = [
+            ('can_unpublish_product', 'Может отменять публикацию товара'),
+        ]
 
 
 class ContactInfo(models.Model):

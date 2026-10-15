@@ -1,11 +1,12 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import F
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
 from catalog.emails import send_views_milestone_email
 from catalog.forms import FeedbackForm, ProductForm
@@ -98,6 +99,19 @@ class ProductDeleteView(LoginRequiredMixin, OwnerOrPermissionMixin, DeleteView):
     model = Product
     success_url = reverse_lazy('catalog:home')
     moderator_permission = 'catalog.delete_product'
+
+
+class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """Снять товар с публикации. Только POST: действие меняет данные."""
+
+    permission_required = 'catalog.can_unpublish_product'
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        product.is_published = False
+        product.save()
+        messages.success(request, f'Товар «{product.name}» снят с публикации.')
+        return redirect(product)
 
 
 class CategoryProductListView(NearestPageMixin, ListView):
