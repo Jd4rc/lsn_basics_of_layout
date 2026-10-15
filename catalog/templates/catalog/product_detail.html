@@ -24,7 +24,7 @@
     </li>
     <li>Состояние: {{ product.get_condition_display }}</li>
     <li>Остаток на складе: {{ product.stock }}</li>
-    <li>В продаже: {{ product.is_active|yesno:"да,нет" }}</li>
+    <li>Опубликован: {{ product.is_published|yesno:"да,нет" }}</li>
     <li>Добавлен: {{ product.created_at|date:"d.m.Y H:i" }}</li>
     <li>Обновлён: {{ product.updated_at|date:"d.m.Y H:i" }}</li>
     <li>Просмотры: {{ product.views_count }}</li>

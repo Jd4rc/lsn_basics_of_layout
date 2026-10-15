@@ -38,7 +38,7 @@ class NearestPageMixin:
 
 
 class ProductListView(NearestPageMixin, ListView):
-    queryset = Product.objects.filter(is_active=True)
+    queryset = Product.objects.filter(is_published=True)
     template_name = 'catalog/home.html'
     context_object_name = 'products'
     paginate_by = PRODUCTS_PER_PAGE
@@ -83,7 +83,7 @@ class CategoryProductListView(NearestPageMixin, ListView):
     def get_queryset(self):
         # 404 на несуществующий слаг, иначе <slug:slug>/ отдаст пустую «категорию» с кодом 200
         self.category = get_object_or_404(Category, slug=self.kwargs['slug'])
-        return self.category.products.filter(is_active=True)
+        return self.category.products.filter(is_published=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

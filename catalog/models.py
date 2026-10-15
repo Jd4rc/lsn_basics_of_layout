@@ -28,7 +28,8 @@ class Product(models.Model):
         max_digits=10, decimal_places=2, verbose_name='Цена, ₽'
     )
     stock = models.PositiveIntegerField(default=0, verbose_name='Остаток на складе')
-    is_active = models.BooleanField(default=True, verbose_name='В продаже')
+    # По умолчанию не опубликован: новый товар не попадает на витрину, пока его не опубликуют
+    is_published = models.BooleanField(default=False, verbose_name='Опубликован')
     image = models.ImageField(
         upload_to='products/', blank=True, null=True, verbose_name='Фото'
     )
