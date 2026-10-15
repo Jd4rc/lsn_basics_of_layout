@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
@@ -37,6 +38,23 @@ class NearestPageMixin:
         return paginator, page, page.object_list, page.has_other_pages()
 
 
+class OwnerOrPermissionMixin:
+    """Объект доступен его владельцу или пользователю с правом moderator_permission.
+
+    Ставится левее UpdateView / DeleteView. Остальным — 403.
+    """
+
+    moderator_permission = None
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        # owner_id, а не owner: сравнение без лишнего запроса за пользователем
+        if obj.owner_id != user.pk and not user.has_perm(self.moderator_permission):
+            raise PermissionDenied
+        return obj
+
+
 class ProductListView(NearestPageMixin, ListView):
     queryset = Product.objects.filter(is_published=True)
     template_name = 'catalog/home.html'
@@ -64,15 +82,22 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
 
+    def form_valid(self, form):
+        # Поля owner в форме нет: владелец — тот, кто создаёт товар
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, OwnerOrPermissionMixin, UpdateView):
     model = Product
     form_class = ProductForm
+    moderator_permission = 'catalog.change_product'
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+class ProductDeleteView(LoginRequiredMixin, OwnerOrPermissionMixin, DeleteView):
     model = Product
     success_url = reverse_lazy('catalog:home')
+    moderator_permission = 'catalog.delete_product'
 
 
 class CategoryProductListView(NearestPageMixin, ListView):

@@ -30,8 +30,13 @@
     <li>Просмотры: {{ product.views_count }}</li>
 </ul>
 
+{# Те же условия, что в OwnerOrPermissionMixin: поменял одно — поменяй и другое #}
+{% if product.owner_id == user.pk or perms.catalog.change_product %}
 <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-ink">Редактировать</a>
+{% endif %}
+{% if product.owner_id == user.pk or perms.catalog.delete_product %}
 <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-ink">Удалить</a>
+{% endif %}
 <a href="{% url 'catalog:home' %}" class="btn btn-ink">На главную</a>
 
 {% endblock %}

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 
@@ -36,6 +37,16 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Добавлен')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлён')
     views_count = models.PositiveIntegerField(default=0, verbose_name='Просмотры')
+    # null=True: у товаров, заведённых до появления владельца, его нет.
+    # SET_NULL: удаление пользователя не уносит с собой его товары
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='products',
+        verbose_name='Владелец',
+    )
 
     NEW = 'new'
     USED = 'used'
