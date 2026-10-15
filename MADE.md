@@ -13,6 +13,19 @@
 
 ---
 
+## 2026-10-15 · hw_28: права доступа · `feat: add product publication status` `feat: restrict product editing and deletion to owner or moderator` `feat: add product moderator group with unpublish permission` `docs: update README`
+
+- `is_active` → `is_published` (`default=False`), `Product.owner` (`SET_NULL`), владелец ставится в
+  `ProductCreateView.form_valid()`. `OwnerOrPermissionMixin`: правка/удаление — владелец или
+  `change_product` / `delete_product`, иначе 403; кнопки в `product_detail.html` по тем же условиям.
+- Право `can_unpublish_product` в `Meta.permissions`, `ProductUnpublishView` (POST, `PermissionRequiredMixin`).
+  Команда `create_groups`: «Модератор продуктов» = `can_unpublish_product` + `delete_product` + `change_product`.
+
+**Знать:** переименование поля — миграция руками (`RenameField`): без интерактивного вопроса
+`makemigrations` делает `RemoveField` + `AddField` и теряет значения. Права создаёт `post_migrate`,
+поэтому `create_groups` до `migrate` падает с просьбой его выполнить. `dumpdata catalog` теперь
+выгрузит `owner` — на чистой базе без этих пользователей фикстура не загрузится.
+
 ## 2026-10-10 · hw_27: пользователи и вход · `refactor: extract image check for reuse` `feat: switch built-in messages to Russian` `feat: add users app with email-based custom user model` `feat: add registration, login, logout and profile` `feat: require login for product pages` `docs: update README`
 
 - Приложение `users`: `User(AbstractUser)` без `username`, `USERNAME_FIELD = 'email'`, поля `avatar`,

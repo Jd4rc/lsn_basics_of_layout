@@ -6,6 +6,10 @@
 
 <h1>{{ product.name }}</h1>
 
+{% for message in messages %}
+<div class="notice mb-4">{{ message }}</div>
+{% endfor %}
+
 {% if product.image %}
 <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid mb-4">
 {% endif %}
@@ -24,14 +28,26 @@
     </li>
     <li>Состояние: {{ product.get_condition_display }}</li>
     <li>Остаток на складе: {{ product.stock }}</li>
-    <li>В продаже: {{ product.is_active|yesno:"да,нет" }}</li>
+    <li>Опубликован: {{ product.is_published|yesno:"да,нет" }}</li>
     <li>Добавлен: {{ product.created_at|date:"d.m.Y H:i" }}</li>
     <li>Обновлён: {{ product.updated_at|date:"d.m.Y H:i" }}</li>
     <li>Просмотры: {{ product.views_count }}</li>
 </ul>
 
+{# Те же условия, что в OwnerOrPermissionMixin: поменял одно — поменяй и другое #}
+{% if product.owner_id == user.pk or perms.catalog.change_product %}
 <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-ink">Редактировать</a>
+{% endif %}
+{% if product.owner_id == user.pk or perms.catalog.delete_product %}
 <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-ink">Удалить</a>
+{% endif %}
+{% if perms.catalog.can_unpublish_product and product.is_published %}
+{# Форма, а не ссылка: ProductUnpublishView принимает только POST #}
+<form method="post" action="{% url 'catalog:product_unpublish' product.pk %}" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-ink">Снять с публикации</button>
+</form>
+{% endif %}
 <a href="{% url 'catalog:home' %}" class="btn btn-ink">На главную</a>
 
 {% endblock %}

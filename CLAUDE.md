@@ -77,7 +77,7 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
   `extra_js`), общие куски в `templates/includes/` (`nav.html`; `pagination.html`
   ждёт `page_obj`), шаблоны приложения в `catalog/templates/catalog/`, карточка
   товара — `catalog/includes/product_card.html` (ждёт `product`).
-- В списках показываются только товары с `is_active=True`, страница товара по прямой
+- В списках показываются только товары с `is_published=True`, страница товара по прямой
   ссылке открывается всегда.
 - Просмотры (`Product.views_count`) считает `ProductDetailView.get_object()` через
   `update()` с `F()`, а не `save()`: `save()` сдвинул бы `updated_at` (`auto_now`).

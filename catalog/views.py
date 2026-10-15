@@ -1,10 +1,12 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import F
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
 from catalog.emails import send_views_milestone_email
 from catalog.forms import FeedbackForm, ProductForm
@@ -37,8 +39,25 @@ class NearestPageMixin:
         return paginator, page, page.object_list, page.has_other_pages()
 
 
+class OwnerOrPermissionMixin:
+    """Объект доступен его владельцу или пользователю с правом moderator_permission.
+
+    Ставится левее UpdateView / DeleteView. Остальным — 403.
+    """
+
+    moderator_permission = None
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        # owner_id, а не owner: сравнение без лишнего запроса за пользователем
+        if obj.owner_id != user.pk and not user.has_perm(self.moderator_permission):
+            raise PermissionDenied
+        return obj
+
+
 class ProductListView(NearestPageMixin, ListView):
-    queryset = Product.objects.filter(is_active=True)
+    queryset = Product.objects.filter(is_published=True)
     template_name = 'catalog/home.html'
     context_object_name = 'products'
     paginate_by = PRODUCTS_PER_PAGE
@@ -64,15 +83,35 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
 
+    def form_valid(self, form):
+        # Поля owner в форме нет: владелец — тот, кто создаёт товар
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, OwnerOrPermissionMixin, UpdateView):
     model = Product
     form_class = ProductForm
+    moderator_permission = 'catalog.change_product'
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+class ProductDeleteView(LoginRequiredMixin, OwnerOrPermissionMixin, DeleteView):
     model = Product
     success_url = reverse_lazy('catalog:home')
+    moderator_permission = 'catalog.delete_product'
+
+
+class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """Снять товар с публикации. Только POST: действие меняет данные."""
+
+    permission_required = 'catalog.can_unpublish_product'
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        product.is_published = False
+        product.save()
+        messages.success(request, f'Товар «{product.name}» снят с публикации.')
+        return redirect(product)
 
 
 class CategoryProductListView(NearestPageMixin, ListView):
@@ -83,7 +122,7 @@ class CategoryProductListView(NearestPageMixin, ListView):
     def get_queryset(self):
         # 404 на несуществующий слаг, иначе <slug:slug>/ отдаст пустую «категорию» с кодом 200
         self.category = get_object_or_404(Category, slug=self.kwargs['slug'])
-        return self.category.products.filter(is_active=True)
+        return self.category.products.filter(is_published=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
