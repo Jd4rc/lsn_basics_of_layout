@@ -4,8 +4,8 @@ from .models import Category, Product, ContactInfo, Feedback
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'category', 'price')
-    list_filter = ('category', 'is_active')
+    list_display = ('id', 'name', 'category', 'price', 'is_published', 'owner')
+    list_filter = ('category', 'is_published')
     search_fields = ('name',)
     readonly_fields = ('created_at', 'updated_at', 'views_count')
 

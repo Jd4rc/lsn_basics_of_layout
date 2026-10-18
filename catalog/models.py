@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 
@@ -28,13 +29,24 @@ class Product(models.Model):
         max_digits=10, decimal_places=2, verbose_name='Цена, ₽'
     )
     stock = models.PositiveIntegerField(default=0, verbose_name='Остаток на складе')
-    is_active = models.BooleanField(default=True, verbose_name='В продаже')
+    # По умолчанию не опубликован: новый товар не попадает на витрину, пока его не опубликуют
+    is_published = models.BooleanField(default=False, verbose_name='Опубликован')
     image = models.ImageField(
         upload_to='products/', blank=True, null=True, verbose_name='Фото'
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Добавлен')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлён')
     views_count = models.PositiveIntegerField(default=0, verbose_name='Просмотры')
+    # null=True: у товаров, заведённых до появления владельца, его нет.
+    # SET_NULL: удаление пользователя не уносит с собой его товары
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='products',
+        verbose_name='Владелец',
+    )
 
     NEW = 'new'
     USED = 'used'
@@ -60,6 +72,9 @@ class Product(models.Model):
         verbose_name = 'товар'
         verbose_name_plural = 'товары'
         ordering = ['-created_at', 'name']
+        permissions = [
+            ('can_unpublish_product', 'Может отменять публикацию товара'),
+        ]
 
 
 class ContactInfo(models.Model):

@@ -82,7 +82,7 @@ class ProductForm(StyleFormMixin, forms.ModelForm):
             'stock',
             'condition',
             'image',
-            'is_active',
+            'is_published',
         )
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
