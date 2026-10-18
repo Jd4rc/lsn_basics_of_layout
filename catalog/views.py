@@ -11,6 +11,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, U
 from catalog.emails import send_views_milestone_email
 from catalog.forms import FeedbackForm, ProductForm
 from catalog.models import Category, ContactInfo, Feedback, Product
+from catalog.services import get_published_products_by_category
 
 PRODUCTS_PER_PAGE = 6
 VIEWS_MILESTONE = 100
@@ -122,7 +123,7 @@ class CategoryProductListView(NearestPageMixin, ListView):
     def get_queryset(self):
         # 404 на несуществующий слаг, иначе <slug:slug>/ отдаст пустую «категорию» с кодом 200
         self.category = get_object_or_404(Category, slug=self.kwargs['slug'])
-        return self.category.products.filter(is_published=True)
+        return get_published_products_by_category(self.category)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
