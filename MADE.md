@@ -13,6 +13,23 @@
 
 ---
 
+## 2026-10-16 · hw_29: кеширование и сервисный слой · `chore: add redis cache backend` `feat: cache product detail page` `refactor: move category products query to service layer` `docs: update README`
+
+- `CACHES`: Redis по `REDIS_URL` (`/0` — `default`, `/1` — `pages`), без него `LocMemCache`. Пакет `redis`.
+- `ProductDetailView`: `cache_page(15 мин, cache='pages')` + `vary_on_cookie` на `get`. `catalog/signals.py`
+  чистит `pages` после коммита при сохранении/удалении товара или категории.
+- `catalog/services.py`: `get_published_products_by_category()`, её зовёт `CategoryProductListView`.
+
+**Знать:** без `vary_on_cookie` страница первого открывшего достаётся всем — сессии ставят `Vary: Cookie`
+уже после `cache_page` (проверено: Борис видел имя Алисы). Ключ `cache_page` к товару не привязать,
+поэтому сброс — `clear()` целого алиаса, а у Redis это `FLUSHDB`: отсюда отдельная база. Просмотры
+теперь считаются по промахам кеша — одно на пользователя за 15 минут. Заход без `csrftoken` —
+всегда промах: ответ ставит куку, и следующий запрос идёт уже с другим `Cookie`. `cache_page` отдаёт
+браузеру `max-age=900` — его копию сигнал не сбросит, поэтому `dispatch()` после рендера ставит
+`private, no-cache` (до рендера `private` запретил бы и серверный кеш).
+
+---
+
 ## 2026-10-15 · hw_28: права доступа · `feat: add product publication status` `feat: restrict product editing and deletion to owner or moderator` `feat: add product moderator group with unpublish permission` `docs: update README`
 
 - `is_active` → `is_published` (`default=False`), `Product.owner` (`SET_NULL`), владелец ставится в

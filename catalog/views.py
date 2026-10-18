@@ -6,6 +6,10 @@ from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.cache import patch_cache_control
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_cookie
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, View
 
 from catalog.emails import send_views_milestone_email
@@ -15,6 +19,7 @@ from catalog.services import get_published_products_by_category
 
 PRODUCTS_PER_PAGE = 6
 VIEWS_MILESTONE = 100
+PRODUCT_PAGE_CACHE_TIMEOUT = 60 * 15
 
 
 class FeedbackCreateView(SuccessMessageMixin, CreateView):
@@ -64,10 +69,28 @@ class ProductListView(NearestPageMixin, ListView):
     paginate_by = PRODUCTS_PER_PAGE
 
 
+# На get, а не на dispatch: гостя LoginRequiredMixin отправляет на вход раньше, чем дойдёт до кеша.
+# vary_on_cookie внутри cache_page: у каждого пользователя своя копия (имя в меню, кнопки по правам,
+# CSRF-токен). Сессии добавят Vary: Cookie уже после кеширования, и без него первый открывший
+# страницу показывал бы свою копию всем. Устаревшие копии сбрасывает catalog/signals.py
+@method_decorator([cache_page(PRODUCT_PAGE_CACHE_TIMEOUT, cache='pages'), vary_on_cookie], name='get')
 class ProductDetailView(LoginRequiredMixin, DetailView):
     model = Product
 
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        # cache_page разрешает и браузеру держать страницу 15 минут (max-age), а его копию
+        # signals.py не сбросит: после правки браузер показал бы старую. Браузеру — перепроверять
+        # каждый раз. Только после рендера: private раньше не дал бы cache_page сохранить страницу
+        if hasattr(response, 'add_post_render_callback'):
+            response.add_post_render_callback(
+                lambda r: patch_cache_control(r, private=True, no_cache=True, max_age=0)
+            )
+        return response
+
     def get_object(self, queryset=None):
+        # Вызывается только при промахе кеша: повторное открытие тем же пользователем
+        # в пределах PRODUCT_PAGE_CACHE_TIMEOUT отдаётся из кеша и просмотр не добавляет
         product = super().get_object(queryset)
         # update() с F(), а не save(): save() сдвинул бы updated_at (auto_now) при каждом просмотре.
         # UPDATE держит строку до конца транзакции, поэтому каждый запрос читает своё новое
