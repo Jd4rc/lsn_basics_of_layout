@@ -88,6 +88,10 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
   Браузеру `dispatch()` ставит `private, no-cache` через `add_post_render_callback`: обычный
   `cache_control`/`never_cache` сработал бы до рендера, и `cache_page` не сохранил бы страницу.
 - Выборки для вьюх — функции в `catalog/services.py`, без HTTP (404 остаётся во вьюхе).
+  `get_published_products_by_category()` кеширует список в `default` под ключом `category_<id>`
+  (15 минут) и возвращает `list`, не QuerySet. Ключ удаляют сигналы в `catalog/signals.py`:
+  товар сохранён/удалён — его категория и старая при переносе (`pre_save`), категория — её ключ.
+  Только `delete`/`delete_many` по ключу, не `clear()` — у Redis это `FLUSHDB` всей базы.
 - Просмотры (`Product.views_count`) считает `ProductDetailView.get_object()` через
   `update()` с `F()`, а не `save()`: `save()` сдвинул бы `updated_at` (`auto_now`).
   Новое значение читается в той же транзакции, что и `UPDATE`: только так письмо

@@ -13,6 +13,16 @@
 
 ---
 
+## 2026-10-18 · hw_29: низкоуровневый кеш товаров категории · `feat: cache category products in redis`
+
+- `get_published_products_by_category()` кладёт `list` товаров в `default` под `category_<id>` на 15 минут.
+- `catalog/signals.py`: товар — удаляет ключ его категории и старой при переносе (`pre_save`), категория — свой.
+
+**Знать:** проверять `is None`, а не `not` — иначе пустая категория (`[]`) каждый раз шла бы в базу.
+Сброс — `delete_many` по ключам, не `clear()`: `default` общий, `FLUSHDB` снёс бы всё.
+
+---
+
 ## 2026-10-16 · hw_29: кеширование и сервисный слой · `chore: add redis cache backend` `feat: cache product detail page` `refactor: move category products query to service layer` `docs: update README`
 
 - `CACHES`: Redis по `REDIS_URL` (`/0` — `default`, `/1` — `pages`), без него `LocMemCache`. Пакет `redis`.
