@@ -131,6 +131,35 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Cache
+# https://docs.djangoproject.com/en/6.1/topics/cache/
+
+# Без REDIS_URL кеш живёт в памяти процесса runserver: сайт работает и без Redis.
+# 'pages' — страницы товаров (cache_page). У него своя база Redis, потому что при изменении
+# товара его чистят целиком (catalog/signals.py), а clear() у Redis — это FLUSHDB всей базы
+REDIS_URL = os.environ.get('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': f'{REDIS_URL}/0',
+        },
+        'pages': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': f'{REDIS_URL}/1',
+        },
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        },
+        'pages': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'pages',  # другой LOCATION — другое хранилище, иначе clear() заденет и default
+        },
+    }
+
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
