@@ -33,6 +33,7 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
 - Тесты пока не написаны (`catalog/tests.py` пустой). Они идут на PostgreSQL, поэтому
   у пользователя из `DB_USER` должно быть право `CREATEDB` для тестовой базы.
 - Линтера и форматтера в проекте нет.
+- Без `REDIS_URL` в `.env` кеш — `LocMemCache` в памяти процесса, Redis не нужен.
 - Без `.env` с `SECRET_KEY` ничего не запустится: `settings.py` читает его через
   `os.environ['SECRET_KEY']`. Оттуда же берутся `DEBUG` и `DB_*`. `ALLOWED_HOSTS`
   в `.env.example` есть, но настройки его не читают: список захардкожен в `settings.py`.
@@ -79,11 +80,23 @@ poetry run python manage.py test catalog.tests.SomeTestCase.test_method   # од
   товара — `catalog/includes/product_card.html` (ждёт `product`).
 - В списках показываются только товары с `is_published=True`, страница товара по прямой
   ссылке открывается всегда.
+- Страница товара кешируется: `cache_page(..., cache='pages')` + `vary_on_cookie` на `get`
+  у `ProductDetailView` (порядок: `cache_page` снаружи). Без `vary_on_cookie` одна копия с чужим
+  именем и кнопками уходит всем. Сброс — `catalog/signals.py` чистит весь алиас `pages`
+  после коммита при сохранении товара или категории. Что меняет страницу товара и при этом
+  не шлёт `post_save` (`update()`, права, группы) — показывается с опозданием до 15 минут.
+  Браузеру `dispatch()` ставит `private, no-cache` через `add_post_render_callback`: обычный
+  `cache_control`/`never_cache` сработал бы до рендера, и `cache_page` не сохранил бы страницу.
+- Выборки для вьюх — функции в `catalog/services.py`, без HTTP (404 остаётся во вьюхе).
+  `get_published_products_by_category()` кеширует список в `default` под ключом `category_<id>`
+  (15 минут) и возвращает `list`, не QuerySet. Ключ удаляют сигналы в `catalog/signals.py`:
+  товар сохранён/удалён — его категория и старая при переносе (`pre_save`), категория — её ключ.
+  Только `delete`/`delete_many` по ключу, не `clear()` — у Redis это `FLUSHDB` всей базы.
 - Просмотры (`Product.views_count`) считает `ProductDetailView.get_object()` через
   `update()` с `F()`, а не `save()`: `save()` сдвинул бы `updated_at` (`auto_now`).
   Новое значение читается в той же транзакции, что и `UPDATE`: только так письмо
   на `VIEWS_MILESTONE` (`catalog/emails.py`) уходит ровно один раз при одновременных
-  открытиях.
+  открытиях. Из-за кеша `get_object()` вызывается только при промахе.
 - `Product.category` — `on_delete=PROTECT`, `related_name='products'`: категорию
   с товарами удалить нельзя (`ProtectedError`), поэтому товары удаляются первыми.
 - Загруженные фото лежат в `media/products/` (в `.gitignore`). Django раздаёт их
